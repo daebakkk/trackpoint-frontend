@@ -1,4 +1,5 @@
 import Navbar from '../components/Navbar';
+import PageSidebar from '../components/PageSidebar';
 
 const kpis = [
   { label: 'Asset Uptime', value: '99.4%', trend: '+1.2% vs last week' },
@@ -35,93 +36,98 @@ export default function Dashboard() {
       </header>
 
       <main className="dashPageModern">
-        <section className="dashHero">
-          <h1 className="dashTitle">Dashboard</h1>
-          <p className="dashSubtle">Real-time visibility across assets, incidents, and team performance.</p>
-        </section>
+        <div className="appPageLayout">
+          <PageSidebar context="Dashboard" />
+          <div className="appPageMain">
+            <section className="dashHero">
+              <h1 className="dashTitle">Dashboard</h1>
+              <p className="dashSubtle">Real-time visibility across assets, incidents, and team performance.</p>
+            </section>
 
-        <section className="dashKpiGrid">
-          {kpis.map((card) => (
-            <article key={card.label} className="dashKpiCard">
-              <p className="dashKpiLabel">{card.label}</p>
-              <p className="dashKpiValue">{card.value}</p>
-              <p className="dashKpiTrend">{card.trend}</p>
-            </article>
-          ))}
-        </section>
+            <section className="dashKpiGrid">
+              {kpis.map((card) => (
+                <article key={card.label} className="dashKpiCard">
+                  <p className="dashKpiLabel">{card.label}</p>
+                  <p className="dashKpiValue">{card.value}</p>
+                  <p className="dashKpiTrend">{card.trend}</p>
+                </article>
+              ))}
+            </section>
 
-        <section className="dashMainGrid">
-          <article className="dashPanel dashPanelWide">
-            <div className="dashPanelHeader">
-              <h2>Incident Trend (7 Days)</h2>
-              <span>Live</span>
-            </div>
-            <svg viewBox="0 0 600 220" className="dashLineChart" role="img" aria-label="Incident trend line chart">
-              <defs>
-                <linearGradient id="lineGlow" x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.36" />
-                  <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <rect x="0" y="0" width="600" height="220" fill="transparent" />
-              <g className="dashGridLines">
-                <line x1="40" y1="30" x2="580" y2="30" />
-                <line x1="40" y1="80" x2="580" y2="80" />
-                <line x1="40" y1="130" x2="580" y2="130" />
-                <line x1="40" y1="180" x2="580" y2="180" />
-              </g>
-              <path d="M40 180 L120 160 L200 120 L280 132 L360 92 L440 104 L520 70" className="dashLineArea" />
-              <polyline points="40,180 120,160 200,120 280,132 360,92 440,104 520,70" className="dashLinePath" />
-            </svg>
-          </article>
-
-          <article className="dashPanel">
-            <div className="dashPanelHeader">
-              <h2>Team Utilization</h2>
-            </div>
-            <div className="dashBars">
-              {utilization.map((bar) => (
-                <div key={bar.team} className="dashBarRow">
-                  <div className="dashBarMeta">
-                    <span>{bar.team}</span>
-                    <span>{bar.value}%</span>
-                  </div>
-                  <div className="dashBarTrack">
-                    <div className="dashBarFill" style={{ width: `${bar.value}%` }} />
-                  </div>
+            <section className="dashMainGrid">
+              <article className="dashPanel dashPanelWide">
+                <div className="dashPanelHeader">
+                  <h2>Incident Trend (7 Days)</h2>
+                  <span>Live</span>
                 </div>
-              ))}
-            </div>
-          </article>
+                <svg viewBox="0 0 600 220" className="dashLineChart" role="img" aria-label="Incident trend line chart">
+                  <defs>
+                    <linearGradient id="lineGlow" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.36" />
+                      <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <rect x="0" y="0" width="600" height="220" fill="transparent" />
+                  <g className="dashGridLines">
+                    <line x1="40" y1="30" x2="580" y2="30" />
+                    <line x1="40" y1="80" x2="580" y2="80" />
+                    <line x1="40" y1="130" x2="580" y2="130" />
+                    <line x1="40" y1="180" x2="580" y2="180" />
+                  </g>
+                  <path d="M40 180 L120 160 L200 120 L280 132 L360 92 L440 104 L520 70" className="dashLineArea" />
+                  <polyline points="40,180 120,160 200,120 280,132 360,92 440,104 520,70" className="dashLinePath" />
+                </svg>
+              </article>
 
-          <article className="dashPanel">
-            <div className="dashPanelHeader">
-              <h2>Recent Activity</h2>
-            </div>
-            <ul className="dashList">
-              {recentActivity.map((activity) => (
-                <li key={activity.item}>
-                  <p>{activity.item}</p>
-                  <span>{activity.time}</span>
-                </li>
-              ))}
-            </ul>
-          </article>
+              <article className="dashPanel">
+                <div className="dashPanelHeader">
+                  <h2>Team Utilization</h2>
+                </div>
+                <div className="dashBars">
+                  {utilization.map((bar) => (
+                    <div key={bar.team} className="dashBarRow">
+                      <div className="dashBarMeta">
+                        <span>{bar.team}</span>
+                        <span>{bar.value}%</span>
+                      </div>
+                      <div className="dashBarTrack">
+                        <div className="dashBarFill" style={{ width: `${bar.value}%` }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </article>
 
-          <article className="dashPanel">
-            <div className="dashPanelHeader">
-              <h2>Priority Alerts</h2>
-            </div>
-            <ul className="dashAlertList">
-              {alerts.map((alert) => (
-                <li key={alert.item}>
-                  <span className={`dashBadge dashBadge${alert.level}`}>{alert.level}</span>
-                  <p>{alert.item}</p>
-                </li>
-              ))}
-            </ul>
-          </article>
-        </section>
+              <article className="dashPanel">
+                <div className="dashPanelHeader">
+                  <h2>Recent Activity</h2>
+                </div>
+                <ul className="dashList">
+                  {recentActivity.map((activity) => (
+                    <li key={activity.item}>
+                      <p>{activity.item}</p>
+                      <span>{activity.time}</span>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+
+              <article className="dashPanel">
+                <div className="dashPanelHeader">
+                  <h2>Priority Alerts</h2>
+                </div>
+                <ul className="dashAlertList">
+                  {alerts.map((alert) => (
+                    <li key={alert.item}>
+                      <span className={`dashBadge dashBadge${alert.level}`}>{alert.level}</span>
+                      <p>{alert.item}</p>
+                    </li>
+                  ))}
+                </ul>
+              </article>
+            </section>
+          </div>
+        </div>
       </main>
     </div>
   );

@@ -21,6 +21,7 @@
   height: 56px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .navBrand {
@@ -28,6 +29,29 @@
   font-weight: 800;
   letter-spacing: 0.01em;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
+}
+
+.navIconBtn {
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.navIconBtn:hover {
+  border-color: var(--highlights-color);
+  color: var(--highlights-color);
+}
+
+.navIcon {
+  width: 18px;
+  height: 18px;
 }
 
 .navLinks {

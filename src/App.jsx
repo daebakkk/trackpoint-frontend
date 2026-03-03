@@ -4,7 +4,10 @@ import Landingpg from './pages/Landingpg';
 import Signup from './pages/Signup';
 import Assets from './pages/Assets';
 import Staff from './pages/Staff';
-import Repairs from './pages/Repairs';
+import Maintenance from './pages/Maintenance';
+import Reports from './pages/Reports';
+import Location from './pages/Location';
+import Assignments from './pages/Assignments';
 
 function App() {
   return (
@@ -17,7 +20,10 @@ function App() {
         <Route path="/assets" element={<Assets />} />
         <Route path="/stfdr" element={<Staff />} />
         <Route path="/staff" element={<Staff />} />
-        <Route path="/repairs" element={<Repairs />} />
+        <Route path="/maintenance" element={<Maintenance />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/location" element={<Location />} />
+        <Route path="/assignments" element={<Assignments />} />
       </Routes>
     </Router>
   </>
