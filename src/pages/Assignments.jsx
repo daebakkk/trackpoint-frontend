@@ -123,7 +123,7 @@ export default function Assignments() {
           <div className="appPageMain">
             <section className="asnTop">
               <div className="asnTopRow">
-                <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Create Assignment</button>
+                <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Assign</button>
               </div>
             </section>
 
@@ -228,7 +228,7 @@ export default function Assignments() {
               <div className="entryModalBackdrop" onClick={() => setShowForm(false)}>
                 <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Create assignment" onClick={(e) => e.stopPropagation()}>
                   <div className="entryModalHead">
-                    <h2>Create Assignment</h2>
+                    <h2>Assign Asset</h2>
                     <button type="button" className="entryCloseBtn" onClick={() => setShowForm(false)} aria-label="Close assignment form">x</button>
                   </div>
                   <form className="entryForm" onSubmit={handleSubmit}>
@@ -255,10 +255,6 @@ export default function Assignments() {
                         <option>In Review</option>
                         <option>Returned</option>
                       </select>
-                    </label>
-                    <label>
-                      Approved by
-                      <input name="approvedBy" value={form.approvedBy} onChange={handleChange} required />
                     </label>
                     <button type="submit" className="entrySubmitBtn">Save Assignment</button>
                   </form>
