@@ -113,14 +113,18 @@ export default function Assignments() {
 
       <main className="asnPage">
         <div className="appPageLayout">
-          <PageSidebar context="Assignments" />
+          <div className="appPageLeftRail">
+            <section className="appPageLeftIntro">
+              <h1>Assignments</h1>
+              <p>Track device assignment lifecycle across teams and offices.</p>
+            </section>
+            <PageSidebar context="Assignments" />
+          </div>
           <div className="appPageMain">
             <section className="asnTop">
               <div className="asnTopRow">
-                <h1 className="asnTitle">Assignments</h1>
                 <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Create Assignment</button>
               </div>
-              <p className="asnHeading">Track device assignment lifecycle across teams and offices.</p>
             </section>
 
             <section className="asnLayout">

@@ -51,11 +51,16 @@ export default function Staff() {
 
       <main className="stfPage">
         <div className="appPageLayout">
-          <PageSidebar context="Staff" />
+          <div className="appPageLeftRail">
+            <section className="appPageLeftIntro">
+              <h1>Staff Directory</h1>
+              <p>Staff records with assigned assets and device IDs.</p>
+            </section>
+            <PageSidebar context="Staff" />
+          </div>
           <div className="appPageMain">
             <section className="stfTop">
               <div className="stfTopRow">
-                <h1 className="stfTitle">Staff Directory</h1>
                 <div className="assTopActions">
                   <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Add Staff</button>
                   <select
@@ -71,7 +76,6 @@ export default function Staff() {
                   </select>
                 </div>
               </div>
-              <p className="stfHeading">Staff records with assigned assets and device IDs.</p>
             </section>
 
             <section className="stfCard">

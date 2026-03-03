@@ -31,11 +31,16 @@ export default function Location() {
 
       <main className="locPage">
         <div className="appPageLayout">
-          <PageSidebar context="Location" />
+          <div className="appPageLeftRail">
+            <section className="appPageLeftIntro">
+              <h1>Asset Location Map</h1>
+              <p>In-office location for each asset by building, floor, and room.</p>
+            </section>
+            <PageSidebar context="Location" />
+          </div>
           <div className="appPageMain">
             <section className="locTop">
               <div className="assTopRow">
-                <h1 className="locTitle">Asset Location Map</h1>
                 <select
                   className="assOfficeSelect"
                   value={selectedFilter}
@@ -48,7 +53,6 @@ export default function Location() {
                   ))}
                 </select>
               </div>
-              <p className="locHeading">In-office location for each asset by building, floor, and room.</p>
             </section>
 
             <section className="locCard">

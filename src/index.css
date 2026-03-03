@@ -292,6 +292,7 @@ body {
 }
 
 .dashHero {
+  margin-top: 0;
   margin-bottom: 1.25rem;
 }
 
@@ -646,6 +647,7 @@ body {
 }
 
 .asnTop {
+  margin-top: 0;
   margin-bottom: 0.95rem;
 }
 
@@ -936,6 +938,7 @@ body {
 }
 
 .assTop {
+  margin-top: 0;
   margin-bottom: 0.95rem;
 }
 
@@ -1303,6 +1306,7 @@ body {
 }
 
 .stfTop {
+  margin-top: 0;
   margin-bottom: 0.95rem;
 }
 
@@ -1547,6 +1551,7 @@ body {
 .mntTop,
 .rptTop,
 .locTop {
+  margin-top: 0;
   margin-bottom: 0.95rem;
 }
 
@@ -1931,6 +1936,7 @@ body {
 }
 
 .mntOpsHero {
+  margin-top: 0;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -2323,10 +2329,38 @@ body {
   min-width: 0;
 }
 
+.appPageLeftRail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 100%;
+}
+
+.appPageLeftIntro {
+  background: var(--primary-color);
+  border-radius: 0.85rem;
+  border: 1px solid rgba(191, 219, 254, 0.2);
+  padding: 0.85rem 0.9rem;
+}
+
+.appPageLeftIntro h1 {
+  margin: 0 0 0.28rem;
+  color: #ffffff;
+  font-size: 1.35rem;
+  line-height: 1.12;
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+}
+
+.appPageLeftIntro p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.82rem;
+}
+
 .appSidebar {
   position: sticky;
   top: 0.85rem;
-  margin-top: 6rem;
+  margin-top: 0;
   background: var(--primary-color);
   border-radius: 0.85rem;
   padding: 0.9rem;
@@ -2495,8 +2529,23 @@ body {
     margin-top: 0;
   }
 
+  .appPageLeftIntro {
+    margin-bottom: 0.15rem;
+  }
+
   .appSidebarNav {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashHero,
+  .asnTop,
+  .assTop,
+  .stfTop,
+  .mntTop,
+  .rptTop,
+  .locTop,
+  .mntOpsHero {
+    margin-top: 0;
   }
 
   .mntOpsMainGrid,

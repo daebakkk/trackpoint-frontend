@@ -55,14 +55,18 @@ export default function Reports() {
 
       <main className="rptPage">
         <div className="appPageLayout">
-          <PageSidebar context="Reports" />
+          <div className="appPageLeftRail">
+            <section className="appPageLeftIntro">
+              <h1>Reports</h1>
+              <p>Asset health report summary for operations and maintenance.</p>
+            </section>
+            <PageSidebar context="Reports" />
+          </div>
           <div className="appPageMain">
             <section className="rptTop">
               <div className="rptTopRow">
-                <h1 className="rptTitle">Reports</h1>
                 <button type="button" className="pageActionBtn">Create Report</button>
               </div>
-              <p className="rptHeading">Asset health report summary for operations and maintenance.</p>
               <div className="rptRangeBar">
                 {ranges.map((item) => (
                   <button

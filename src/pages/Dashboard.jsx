@@ -37,13 +37,14 @@ export default function Dashboard() {
 
       <main className="dashPageModern">
         <div className="appPageLayout">
-          <PageSidebar context="Dashboard" />
-          <div className="appPageMain">
-            <section className="dashHero">
-              <h1 className="dashTitle">Dashboard</h1>
-              <p className="dashSubtle">Real-time visibility across assets, incidents, and team performance.</p>
+          <div className="appPageLeftRail">
+            <section className="appPageLeftIntro">
+              <h1>Dashboard</h1>
+              <p>Real-time visibility across assets, incidents, and team performance.</p>
             </section>
-
+            <PageSidebar context="Dashboard" />
+          </div>
+          <div className="appPageMain">
             <section className="dashKpiGrid">
               {kpis.map((card) => (
                 <article key={card.label} className="dashKpiCard">

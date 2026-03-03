@@ -71,11 +71,6 @@ export default function PageSidebar({ context = 'Dashboard' }) {
   return (
     <aside className="appSidebar">
       <section className="appSidebarSection">
-        <h3>{context}</h3>
-        <p>Context panel for this page.</p>
-      </section>
-
-      <section className="appSidebarSection">
         <h4>Snapshot</h4>
         <div className="appSidebarMeta">
           <p className="appSidebarMetaLabel">{content.status}</p>

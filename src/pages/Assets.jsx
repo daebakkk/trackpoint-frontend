@@ -58,11 +58,16 @@ export default function Assets() {
             </header>
             <main className="assPage">
                 <div className="appPageLayout">
-                    <PageSidebar context="Assets" />
+                    <div className="appPageLeftRail">
+                        <section className="appPageLeftIntro">
+                            <h1>Assets</h1>
+                            <p>Track all office assets reliably</p>
+                        </section>
+                        <PageSidebar context="Assets" />
+                    </div>
                     <div className="appPageMain">
                         <section className="assTop">
                             <div className="assTopRow">
-                                <h1 className="assTitle">Assets</h1>
                                 <div className="assTopActions">
                                     <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Add Asset</button>
                                     <select
@@ -78,7 +83,6 @@ export default function Assets() {
                                     </select>
                                 </div>
                             </div>
-                            <p className="assHeading">Track all office assets reliably</p>
                         </section>
 
                         <section className="assGrid">

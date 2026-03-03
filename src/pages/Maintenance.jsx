@@ -38,13 +38,17 @@ export default function Maintenance() {
 
       <main className="mntOpsPage">
         <div className="appPageLayout">
-          <PageSidebar context="Maintenance" />
+          <div className="appPageLeftRail">
+            <section className="appPageLeftIntro">
+              <h1>Preventive + Corrective Operations</h1>
+              <p>A live operations board for maintenance routing, machine health, and execution timeline.</p>
+            </section>
+            <PageSidebar context="Maintenance" />
+          </div>
           <div className="appPageMain">
             <section className="mntOpsHero">
               <div>
                 <p className="mntOpsEyebrow">Maintenance Control Board</p>
-                <h1 className="mntOpsTitle">Preventive + Corrective Operations</h1>
-                <p className="mntOpsSub">A live operations board for maintenance routing, machine health, and execution timeline.</p>
               </div>
               <button type="button" className="pageActionBtn">Create Ticket</button>
             </section>
