@@ -1,57 +1,104 @@
 import Navbar from '../components/Navbar';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
-const initialAssignments = [
-  { id: 'AS-3001', asset: 'ASUS 2022 (0567)', assignee: 'Abisola Adegboruwa', assignedOn: '2026-02-11', returnBy: '2026-08-11', status: 'Active', approvedBy: 'Maya Johnson' },
-  { id: 'AS-3002', asset: 'DELL 2024 (0182)', assignee: 'Casey Luo', assignedOn: '2026-02-08', returnBy: '2026-07-30', status: 'Active', approvedBy: 'Abisola Adegboruwa' },
-  { id: 'AS-3003', asset: 'MacBook Pro (0243)', assignee: 'Jada Ricottski', assignedOn: '2026-01-20', returnBy: '2026-06-20', status: 'In Review', approvedBy: 'Ifeoma Chukwu' },
-  { id: 'AS-3004', asset: 'Surface Laptop 5 (0589)', assignee: 'David Kim', assignedOn: '2026-02-01', returnBy: '2026-09-01', status: 'Active', approvedBy: 'Maya Johnson' },
-  { id: 'AS-3005', asset: 'HP EliteBook 850 (0427)', assignee: 'Ifeoma Chukwu', assignedOn: '2026-01-28', returnBy: '2026-06-28', status: 'Returned', approvedBy: 'Abisola Adegboruwa' },
-  { id: 'AS-3006', asset: 'Lenovo ThinkPad T14 (0311)', assignee: 'Maya Johnson', assignedOn: '2026-02-14', returnBy: '2026-08-14', status: 'Active', approvedBy: 'David Kim' },
-  { id: 'AS-3007', asset: 'Dell OptiPlex 7090 (0648)', assignee: 'Noah Patel', assignedOn: '2026-01-15', returnBy: '2026-07-15', status: 'Active', approvedBy: 'Abisola Adegboruwa' },
-  { id: 'AS-3008', asset: 'iPad Pro 11 (0914)', assignee: 'Tobi Alade', assignedOn: '2026-02-18', returnBy: '2026-05-18', status: 'In Review', approvedBy: 'Maya Johnson' },
-  { id: 'AS-3009', asset: 'Mac Mini M2 (0732)', assignee: 'Ruth Mensah', assignedOn: '2026-01-09', returnBy: '2026-04-09', status: 'Returned', approvedBy: 'Casey Luo' },
-  { id: 'AS-3010', asset: 'Epson Workforce Printer (0675)', assignee: 'Admin Unit', assignedOn: '2026-02-22', returnBy: '2026-06-22', status: 'Active', approvedBy: 'Ifeoma Chukwu' },
-  { id: 'AS-3011', asset: 'HP i7 (0769)', assignee: 'Gbemi Oduselu', assignedOn: '2026-01-30', returnBy: '2026-07-30', status: 'Active', approvedBy: 'Maya Johnson' },
-  { id: 'AS-3012', asset: 'Cisco Catalyst 9200 (0821)', assignee: 'Network Team', assignedOn: '2026-02-03', returnBy: '2026-11-03', status: 'In Review', approvedBy: 'David Kim' },
-  { id: 'AS-3013', asset: 'ASUS 2022 (0567)', assignee: 'Training Pool', assignedOn: '2025-11-25', returnBy: '2026-02-25', status: 'Returned', approvedBy: 'Abisola Adegboruwa' },
-  { id: 'AS-3014', asset: 'Surface Laptop 5 (0589)', assignee: 'Remote Team B', assignedOn: '2025-12-12', returnBy: '2026-03-01', status: 'Returned', approvedBy: 'Maya Johnson' },
-  { id: 'AS-3015', asset: 'HP EliteBook 850 (0427)', assignee: 'Operations Desk', assignedOn: '2026-02-26', returnBy: '2026-08-26', status: 'Active', approvedBy: 'Ifeoma Chukwu' },
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+function normalizeAssignment(item) {
+  const assetLabel = item.asset_name ? `${item.asset_name}${item.asset_code ? ` (${item.asset_code})` : ''}` : `Asset #${item.asset ?? '-'}`;
+  const assigneeLabel = item.assignee_name || (item.assignee ? `Staff #${item.assignee}` : 'Unassigned');
+
+  return {
+    pk: item.id,
+    id: item.assignment_id,
+    asset: assetLabel,
+    assignee: assigneeLabel,
+    assignedOn: item.date_assigned,
+    returnBy: item.return_date || '',
+    status: item.status,
+    approvedBy: item.approved_by || '-',
+  };
+}
 
 export default function Assignments() {
-  const [assignments, setAssignments] = useState(initialAssignments);
+  const [assignments, setAssignments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [historyRange, setHistoryRange] = useState('Last 3 Months');
   const [activeView, setActiveView] = useState('current');
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
-    asset: '',
-    assignee: '',
+    assignmentId: '',
+    assetId: '',
+    assigneeId: '',
     assignedOn: '',
     returnBy: '',
     status: 'Active',
     approvedBy: '',
   });
 
+  useEffect(() => {
+    async function loadAssignments() {
+      setIsLoading(true);
+      setFetchError('');
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/assignments/`);
+        if (!response.ok) throw new Error('Failed to load assignments.');
+        const data = await response.json();
+        setAssignments(data.map(normalizeAssignment));
+      } catch (error) {
+        setFetchError(error.message || 'Unable to fetch assignments.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadAssignments();
+  }, []);
+
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    const nextId = `AS-${String(3000 + assignments.length + 1)}`;
-    setAssignments((prev) => [{ id: nextId, ...form }, ...prev]);
-    setForm({
-      asset: '',
-      assignee: '',
-      assignedOn: '',
-      returnBy: '',
-      status: 'Active',
-      approvedBy: '',
-    });
-    setShowForm(false);
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        assignment_id: form.assignmentId,
+        asset: Number(form.assetId),
+        assignee: form.assigneeId ? Number(form.assigneeId) : null,
+        date_assigned: form.assignedOn,
+        return_date: form.returnBy || null,
+        status: form.status,
+        approved_by: form.approvedBy,
+      };
+      const response = await fetch(`${API_BASE_URL}/api/assignments/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Failed to save assignment.');
+
+      const created = await response.json();
+      setAssignments((prev) => [normalizeAssignment(created), ...prev]);
+      setForm({
+        assignmentId: '',
+        assetId: '',
+        assigneeId: '',
+        assignedOn: '',
+        returnBy: '',
+        status: 'Active',
+        approvedBy: '',
+      });
+      setShowForm(false);
+    } catch (error) {
+      setFetchError(error.message || 'Unable to save assignment.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const assignmentStats = useMemo(() => {
@@ -125,6 +172,8 @@ export default function Assignments() {
               <div className="asnTopRow">
                 <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Assign</button>
               </div>
+              {isLoading && <p className="asnHeading">Loading assignments...</p>}
+              {!isLoading && fetchError && <p className="asnHeading">{fetchError}</p>}
             </section>
 
             <section className="asnLayout">
@@ -233,12 +282,16 @@ export default function Assignments() {
                   </div>
                   <form className="entryForm" onSubmit={handleSubmit}>
                     <label>
-                      Asset
-                      <input name="asset" value={form.asset} onChange={handleChange} placeholder="e.g. HP EliteBook 850 (0427)" required />
+                      Assignment ID
+                      <input name="assignmentId" value={form.assignmentId} onChange={handleChange} placeholder="e.g. AS-3001" required />
                     </label>
                     <label>
-                      Assignee
-                      <input name="assignee" value={form.assignee} onChange={handleChange} required />
+                      Asset DB ID
+                      <input name="assetId" type="number" min="1" value={form.assetId} onChange={handleChange} required />
+                    </label>
+                    <label>
+                      Assignee DB ID (optional)
+                      <input name="assigneeId" type="number" min="1" value={form.assigneeId} onChange={handleChange} />
                     </label>
                     <label>
                       Assigned on
@@ -256,7 +309,13 @@ export default function Assignments() {
                         <option>Returned</option>
                       </select>
                     </label>
-                    <button type="submit" className="entrySubmitBtn">Save Assignment</button>
+                    <label>
+                      Approved by
+                      <input name="approvedBy" value={form.approvedBy} onChange={handleChange} />
+                    </label>
+                    <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
+                      {isSubmitting ? 'Saving...' : 'Save Assignment'}
+                    </button>
                   </form>
                 </div>
               </div>

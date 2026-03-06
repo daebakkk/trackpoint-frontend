@@ -14,6 +14,7 @@ const assetLocations = [
 
 export default function Location() {
   const [selectedFilter, setSelectedFilter] = useState('All Locations');
+  const [searchTerm, setSearchTerm] = useState('');
   const roomOptions = [...new Set(assetLocations.filter((row) => row.building !== 'Fifth Lab').map((row) => row.room))];
   const locationOptions = ['All Locations', 'Fifth Lab', ...roomOptions];
   const filteredRows =
@@ -22,6 +23,10 @@ export default function Location() {
       : selectedFilter === 'Fifth Lab'
         ? assetLocations.filter((row) => row.building === 'Fifth Lab')
         : assetLocations.filter((row) => row.room === selectedFilter);
+  const searchFilteredRows = filteredRows.filter((row) => {
+    const haystack = `${row.asset} ${row.building} ${row.floor} ${row.room} ${row.holder} ${row.status}`.toLowerCase();
+    return haystack.includes(searchTerm.trim().toLowerCase());
+  });
 
   return (
     <div>
@@ -41,6 +46,13 @@ export default function Location() {
           <div className="appPageMain">
             <section className="locTop">
               <div className="assTopRow">
+                <input
+                  className="pageSearchInput"
+                  type="search"
+                  placeholder="Search assets..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
                 <select
                   className="assOfficeSelect"
                   value={selectedFilter}
@@ -56,30 +68,37 @@ export default function Location() {
             </section>
 
             <section className="locCard">
-              <table className="locTable">
-                <thead>
-                  <tr>
-                    <th>Asset</th>
-                    <th>Building</th>
-                    <th>Floor</th>
-                    <th>Room</th>
-                    <th>Current Holder</th>
-                    <th>Location Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRows.map((row) => (
-                    <tr key={row.asset}>
-                      <td>{row.asset}</td>
-                      <td>{row.building}</td>
-                      <td>{row.floor}</td>
-                      <td>{row.room}</td>
-                      <td>{row.holder}</td>
-                      <td><span className={`locBadge locBadge${row.status}`}>{row.status}</span></td>
+              <div className="locTableWrap">
+                <table className="locTable">
+                  <thead>
+                    <tr>
+                      <th>Asset</th>
+                      <th>Building</th>
+                      <th>Floor</th>
+                      <th>Room</th>
+                      <th>Current Holder</th>
+                      <th>Location Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {searchFilteredRows.map((row) => (
+                      <tr key={row.asset}>
+                        <td>{row.asset}</td>
+                        <td>{row.building}</td>
+                        <td>{row.floor}</td>
+                        <td>{row.room}</td>
+                        <td>{row.holder}</td>
+                        <td><span className={`locBadge locBadge${row.status}`}>{row.status}</span></td>
+                      </tr>
+                    ))}
+                    {searchFilteredRows.length === 0 && (
+                      <tr>
+                        <td className="asnEmptyRow" colSpan={6}>No location rows match this search.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </section>
           </div>
         </div>

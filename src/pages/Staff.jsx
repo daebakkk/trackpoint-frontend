@@ -1,40 +1,87 @@
 import Navbar from '../components/Navbar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
-const initialStaffDirectory = [
-  { id: '0941', name: 'Abisola Adegboruwa', office: 'Fifth Lab', title: 'Intern', assignment: 'ASUS 2022 (0567)' },
-  { id: '0122', name: 'Casey Luo', office: 'IT Support Office', title: 'Support Engineer', assignment: 'DELL 2024 (0182)' },
-  { id: '1053', name: 'Gbemi Oduselu', office: 'Training Office', title: 'Systems Trainer', assignment: 'HP i7 (0769)' },
-  { id: '0684', name: 'Jada Ricottski', office: 'Human Resources', title: 'HR Assistant', assignment: 'MacBook Pro (0243)' },
-  { id: '0715', name: 'Maya Johnson', office: 'Finance Wing', title: 'Compliance Analyst', assignment: 'Lenovo ThinkPad T14 (0311)' },
-  { id: '0246', name: 'Noah Patel', office: 'Accounts Office', title: 'IT Technician', assignment: 'Dell OptiPlex 7090 (0648)' },
-  { id: '0137', name: 'Ifeoma Chukwu', office: 'Operations Desk', title: 'Operations Manager', assignment: 'HP EliteBook 850 (0427)' },
-  { id: '0098', name: 'David Kim', office: 'Remote Staff Pool', title: 'Infrastructure Engineer', assignment: 'Surface Laptop 5 (0589)' },
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+function normalizeStaff(item) {
+  return {
+    pk: item.id,
+    id: item.staff_id,
+    name: item.name,
+    office: item.office,
+    title: item.job_title,
+    assignment: 'Unassigned',
+  };
+}
 
 export default function Staff() {
-  const [staffDirectory, setStaffDirectory] = useState(initialStaffDirectory);
+  const [staffDirectory, setStaffDirectory] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
   const [selectedOffice, setSelectedOffice] = useState('All Offices');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortDir, setSortDir] = useState('asc');
   const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
+    staffId: '',
     name: '',
     office: '',
     title: '',
-    assignment: '',
   });
+
+  useEffect(() => {
+    async function loadStaff() {
+      setIsLoading(true);
+      setFetchError('');
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/staff/`);
+        if (!response.ok) throw new Error('Failed to load staff.');
+        const data = await response.json();
+        setStaffDirectory(data.map(normalizeStaff));
+      } catch (error) {
+        setFetchError(error.message || 'Unable to fetch staff.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadStaff();
+  }, []);
 
   function handleChange(event) {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    const nextId = `ST-${String(staffDirectory.length + 1).padStart(3, '0')}`;
-    setStaffDirectory((prev) => [{ id: nextId, ...form }, ...prev]);
-    setForm({ name: '', office: '', title: '', assignment: '' });
-    setShowForm(false);
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        staff_id: form.staffId,
+        name: form.name,
+        office: form.office,
+        job_title: form.title,
+      };
+      const response = await fetch(`${API_BASE_URL}/api/staff/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Failed to save staff.');
+
+      const created = await response.json();
+      setStaffDirectory((prev) => [normalizeStaff(created), ...prev]);
+      setForm({ staffId: '', name: '', office: '', title: '' });
+      setShowForm(false);
+    } catch (error) {
+      setFetchError(error.message || 'Unable to save staff.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const officeOptions = ['All Offices', ...new Set(staffDirectory.map((staff) => staff.office))];
@@ -42,6 +89,26 @@ export default function Staff() {
     selectedOffice === 'All Offices'
       ? staffDirectory
       : staffDirectory.filter((staff) => staff.office === selectedOffice);
+  const searchFilteredStaff = filteredStaff.filter((staff) => {
+    const haystack = `${staff.id} ${staff.name} ${staff.office} ${staff.title} ${staff.assignment}`.toLowerCase();
+    return haystack.includes(searchTerm.trim().toLowerCase());
+  });
+  const sortedStaff = [...searchFilteredStaff].sort((a, b) => {
+    const left = (a[sortBy] ?? '').toString().toLowerCase();
+    const right = (b[sortBy] ?? '').toString().toLowerCase();
+    if (left < right) return sortDir === 'asc' ? -1 : 1;
+    if (left > right) return sortDir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  function handleSort(field) {
+    if (sortBy === field) {
+      setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+      return;
+    }
+    setSortBy(field);
+    setSortDir('asc');
+  }
 
   return (
     <div>
@@ -63,6 +130,13 @@ export default function Staff() {
               <div className="stfTopRow">
                 <div className="assTopActions">
                   <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Add Staff</button>
+                  <input
+                    className="pageSearchInput"
+                    type="search"
+                    placeholder="Search staff..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
                   <select
                     className="assOfficeSelect"
                     value={selectedOffice}
@@ -78,29 +152,34 @@ export default function Staff() {
               </div>
             </section>
 
+            {isLoading && <p className="stfHeading">Loading staff...</p>}
+            {!isLoading && fetchError && <p className="stfHeading">{fetchError}</p>}
+
             <section className="stfCard">
-              <table className="stfTable">
-                <thead>
-                  <tr>
-                    <th>Staff ID</th>
-                    <th>Name</th>
-                    <th>Office</th>
-                    <th>Job Title</th>
-                    <th>Assignment</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredStaff.map((staff) => (
-                    <tr key={staff.id}>
-                      <td>{staff.id}</td>
-                      <td>{staff.name}</td>
-                      <td>{staff.office}</td>
-                      <td>{staff.title}</td>
-                      <td>{staff.assignment}</td>
+              <div className="stfTableWrap">
+                <table className="stfTable">
+                  <thead>
+                    <tr>
+                      <th><button type="button" className="tableSortBtn" onClick={() => handleSort('id')}>Staff ID</button></th>
+                      <th><button type="button" className="tableSortBtn" onClick={() => handleSort('name')}>Name</button></th>
+                      <th><button type="button" className="tableSortBtn" onClick={() => handleSort('office')}>Office</button></th>
+                      <th><button type="button" className="tableSortBtn" onClick={() => handleSort('title')}>Job Title</button></th>
+                      <th><button type="button" className="tableSortBtn" onClick={() => handleSort('assignment')}>Assignment</button></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {sortedStaff.map((staff) => (
+                      <tr key={staff.id}>
+                        <td>{staff.id}</td>
+                        <td>{staff.name}</td>
+                        <td>{staff.office}</td>
+                        <td>{staff.title}</td>
+                        <td>{staff.assignment}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
 
             {showForm && (
@@ -111,6 +190,10 @@ export default function Staff() {
                     <button type="button" className="entryCloseBtn" onClick={() => setShowForm(false)} aria-label="Close add staff form">x</button>
                   </div>
                   <form className="entryForm" onSubmit={handleSubmit}>
+                    <label>
+                      Staff ID
+                      <input name="staffId" value={form.staffId} onChange={handleChange} required />
+                    </label>
                     <label>
                       Full name
                       <input name="name" value={form.name} onChange={handleChange} required />
@@ -123,11 +206,9 @@ export default function Staff() {
                       Job title
                       <input name="title" value={form.title} onChange={handleChange} required />
                     </label>
-                    <label>
-                      Assigned asset
-                      <input name="assignment" value={form.assignment} onChange={handleChange} placeholder="e.g. ASUS 2022 (0567)" />
-                    </label>
-                    <button type="submit" className="entrySubmitBtn">Save Staff</button>
+                    <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
+                      {isSubmitting ? 'Saving...' : 'Save Staff'}
+                    </button>
                   </form>
                 </div>
               </div>

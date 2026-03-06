@@ -45,7 +45,16 @@ const reportByRange = {
 
 export default function Reports() {
   const [range, setRange] = useState('This Month');
+  const [searchTerm, setSearchTerm] = useState('');
   const reportRows = useMemo(() => reportByRange[range], [range]);
+  const searchFilteredRows = useMemo(
+    () =>
+      reportRows.filter((row) => {
+        const haystack = `${row.metric} ${row.count} ${row.note} ${row.trend}`.toLowerCase();
+        return haystack.includes(searchTerm.trim().toLowerCase());
+      }),
+    [reportRows, searchTerm],
+  );
 
   return (
     <div>
@@ -65,7 +74,16 @@ export default function Reports() {
           <div className="appPageMain">
             <section className="rptTop">
               <div className="rptTopRow">
-                <button type="button" className="pageActionBtn">Create Report</button>
+                <div className="assTopActions">
+                  <button type="button" className="pageActionBtn">Create Report</button>
+                  <input
+                    className="pageSearchInput"
+                    type="search"
+                    placeholder="Search report rows..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
               </div>
               <div className="rptRangeBar">
                 {ranges.map((item) => (
@@ -82,26 +100,33 @@ export default function Reports() {
             </section>
 
             <section className="rptCard">
-              <table className="rptTable">
-                <thead>
-                  <tr>
-                    <th>Metric</th>
-                    <th>Count</th>
-                    <th>Details</th>
-                    <th>Trend</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reportRows.map((row) => (
-                    <tr key={row.metric}>
-                      <td>{row.metric}</td>
-                      <td>{row.count}</td>
-                      <td>{row.note}</td>
-                      <td>{row.trend}</td>
+              <div className="rptTableWrap">
+                <table className="rptTable">
+                  <thead>
+                    <tr>
+                      <th>Metric</th>
+                      <th>Count</th>
+                      <th>Details</th>
+                      <th>Trend</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {searchFilteredRows.map((row) => (
+                      <tr key={row.metric}>
+                        <td>{row.metric}</td>
+                        <td>{row.count}</td>
+                        <td>{row.note}</td>
+                        <td>{row.trend}</td>
+                      </tr>
+                    ))}
+                    {searchFilteredRows.length === 0 && (
+                      <tr>
+                        <td className="asnEmptyRow" colSpan={4}>No report rows match this search.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </section>
           </div>
         </div>

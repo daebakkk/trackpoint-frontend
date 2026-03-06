@@ -994,6 +994,45 @@ body {
   border-color: var(--highlights-color);
 }
 
+.pageSearchInput {
+  border: 1px solid rgba(37, 99, 235, 0.34);
+  background: #ffffff;
+  color: var(--secondary-color);
+  border-radius: 0.55rem;
+  padding: 0.43rem 0.62rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  min-width: 210px;
+}
+
+.pageSearchInput:focus {
+  outline: none;
+  border-color: var(--highlights-color);
+}
+
+.tableSortBtn {
+  background: transparent;
+  border: none;
+  color: var(--highlights-color);
+  font-size: 0.86rem;
+  font-weight: 700;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  padding: 0;
+  cursor: pointer;
+}
+
+.tableSortBtn:hover {
+  color: #93c5fd;
+}
+
+.entrySubmitBtn:disabled,
+.loginSubmitBtn:disabled,
+.suButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
 .assOfficeFilters {
   display: flex;
   flex-wrap: wrap;
@@ -1147,6 +1186,15 @@ body {
   overflow-x: auto;
 }
 
+.assTableWrap,
+.stfTableWrap,
+.rptTableWrap,
+.locTableWrap {
+  max-height: 560px;
+  overflow: auto;
+  border-radius: 0.55rem;
+}
+
 .assTable {
   width: 100%;
   border-collapse: collapse;
@@ -1163,6 +1211,10 @@ body {
 .assTable th {
   color: var(--highlights-color);
   font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--primary-color);
 }
 
 .assTable th,
@@ -1266,6 +1318,11 @@ body {
     width: 100%;
   }
 
+  .pageSearchInput {
+    width: 100%;
+    min-width: 0;
+  }
+
   .assTable {
     font-size: 0.86rem;
   }
@@ -1348,6 +1405,10 @@ body {
 .stfTable th {
   color: var(--highlights-color);
   font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--primary-color);
 }
 
 .stfTable th,
@@ -1671,6 +1732,10 @@ body {
 .locTable th {
   color: var(--highlights-color);
   font-weight: 700;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--primary-color);
 }
 
 .mntTable th,

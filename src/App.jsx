@@ -19,7 +19,6 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/assets" element={<Assets />} />
         <Route path="/stfdr" element={<Staff />} />
-        <Route path="/staff" element={<Staff />} />
         <Route path="/maintenance" element={<Maintenance />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/location" element={<Location />} />

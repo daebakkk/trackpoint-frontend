@@ -1,4 +1,15 @@
+import { useState } from 'react';
+
 export default function LoginModal({ onClose }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setIsSubmitting(true);
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    setIsSubmitting(false);
+  }
+
   return (
     <div className="loginModalBackdrop" onClick={onClose}>
       <div className="loginModalCard" role="dialog" aria-modal="true" aria-label="Log in" onClick={(e) => e.stopPropagation()}>
@@ -8,7 +19,7 @@ export default function LoginModal({ onClose }) {
         </div>
         <p className="loginModalSub">Sign in to access your TrackPoint workspace.</p>
 
-        <form className="loginForm">
+        <form className="loginForm" onSubmit={handleSubmit}>
           <label>
             Work email
             <input type="email" placeholder="name@company.com" required />
@@ -17,7 +28,9 @@ export default function LoginModal({ onClose }) {
             Password
             <input type="password" placeholder="Enter password" required />
           </label>
-          <button type="submit" className="loginSubmitBtn">Continue</button>
+          <button type="submit" className="loginSubmitBtn" disabled={isSubmitting}>
+            {isSubmitting ? 'Signing In...' : 'Continue'}
+          </button>
         </form>
       </div>
     </div>

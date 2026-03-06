@@ -1,48 +1,96 @@
 import Navbar from '../components/Navbar';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
-const initialAssets = [
-    { name: 'ASUS 2022', id: '0567', assignment: 'Abisola Adegboruwa', location: 'Fifth Lab', status: 'Good condition' },
-    { name: 'DELL 2024', id: '0182', assignment: 'Casey Luo', location: 'IT Support Office', status: 'In Repair' },
-    { name: 'HP i7', id: '0769', assignment: 'Gbemi Oduselu', location: 'Training Office', status: 'Good condition' },
-    { name: 'MacBook Pro', id: '0243', assignment: 'Jada Ricottski', location: 'HR', status: 'Lost' },
-    { name: 'Lenovo ThinkPad T14', id: '0311', assignment: 'Maya Johnson', location: 'Finance Wing', status: 'Good condition' },
-    { name: 'Dell OptiPlex 7090', id: '0648', assignment: 'Noah Patel', location: 'Accounts Office', status: 'Good condition' },
-    { name: 'iPad Pro 11', id: '0914', assignment: 'Tobi Alade', location: 'Executive Boardroom', status: 'In Use' },
-    { name: 'HP EliteBook 850', id: '0427', assignment: 'Ifeoma Chukwu', location: 'Operations Desk', status: 'In Repair' },
-    { name: 'Surface Laptop 5', id: '0589', assignment: 'David Kim', location: 'Remote Staff Pool', status: 'Good condition' },
-    { name: 'Mac Mini M2', id: '0732', assignment: 'Ruth Mensah', location: 'Design Studio', status: 'Good condition' },
-    { name: 'Cisco Catalyst 9200', id: '0821', assignment: 'Network Team', location: 'Server Room B', status: 'Critical Alert' },
-    { name: 'Epson Workforce Printer', id: '0675', assignment: 'Admin Unit', location: 'Front Office', status: 'Low Toner' },
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+function normalizeAsset(item) {
+    return {
+        id: item.id,
+        name: item.name,
+        assetId: item.asset_id,
+        assignment: item.assigned_to_name || 'Unassigned',
+        location: item.location,
+        status: item.status,
+    };
+}
+
 export default function Assets() {
-    const [assets, setAssets] = useState(initialAssets);
+    const [assets, setAssets] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [fetchError, setFetchError] = useState('');
     const [selectedOffice, setSelectedOffice] = useState('All Offices');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [sortBy, setSortBy] = useState('name');
+    const [sortDir, setSortDir] = useState('asc');
     const [showForm, setShowForm] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [form, setForm] = useState({
+        assetId: '',
         name: '',
-        assignment: '',
         location: '',
         status: 'Good condition',
+        assignedTo: '',
     });
+
+    useEffect(() => {
+        async function loadAssets() {
+            setIsLoading(true);
+            setFetchError('');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/assets/`);
+                if (!response.ok) throw new Error('Failed to load assets');
+                const data = await response.json();
+                setAssets(data.map(normalizeAsset));
+            } catch (error) {
+                setFetchError(error.message || 'Unable to fetch assets.');
+            } finally {
+                setIsLoading(false);
+            }
+        }
+
+        loadAssets();
+    }, []);
 
     function handleChange(event) {
         const { name, value } = event.target;
         setForm((prev) => ({ ...prev, [name]: value }));
     }
 
-    function handleSubmit(event) {
+    async function handleSubmit(event) {
         event.preventDefault();
-        const nextId = String(1000 + assets.length + 1);
-        setAssets((prev) => [{ ...form, id: nextId }, ...prev]);
-        setForm({
-            name: '',
-            assignment: '',
-            location: '',
-            status: 'Good condition',
-        });
-        setShowForm(false);
+        setIsSubmitting(true);
+        try {
+            const payload = {
+                asset_id: form.assetId,
+                name: form.name,
+                location: form.location,
+                status: form.status,
+                assigned_to: form.assignedTo ? Number(form.assignedTo) : null,
+            };
+
+            const response = await fetch(`${API_BASE_URL}/api/assets/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!response.ok) throw new Error('Failed to save asset.');
+
+            const created = await response.json();
+            setAssets((prev) => [normalizeAsset(created), ...prev]);
+            setForm({
+                assetId: '',
+                name: '',
+                location: '',
+                status: 'Good condition',
+                assignedTo: '',
+            });
+            setShowForm(false);
+        } catch (error) {
+            setFetchError(error.message || 'Unable to save asset.');
+        } finally {
+            setIsSubmitting(false);
+        }
     }
 
     const officeOptions = ['All Offices', ...new Set(assets.map((asset) => asset.location))];
@@ -50,6 +98,26 @@ export default function Assets() {
         selectedOffice === 'All Offices'
             ? assets
             : assets.filter((asset) => asset.location === selectedOffice);
+    const searchFilteredAssets = filteredAssets.filter((asset) => {
+        const haystack = `${asset.name} ${asset.assetId} ${asset.assignment} ${asset.location} ${asset.status}`.toLowerCase();
+        return haystack.includes(searchTerm.trim().toLowerCase());
+    });
+    const sortedAssets = [...searchFilteredAssets].sort((a, b) => {
+        const left = (a[sortBy] ?? '').toString().toLowerCase();
+        const right = (b[sortBy] ?? '').toString().toLowerCase();
+        if (left < right) return sortDir === 'asc' ? -1 : 1;
+        if (left > right) return sortDir === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    function handleSort(field) {
+        if (sortBy === field) {
+            setSortDir((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+            return;
+        }
+        setSortBy(field);
+        setSortDir('asc');
+    }
 
     return (
         <div>
@@ -70,6 +138,13 @@ export default function Assets() {
                             <div className="assTopRow">
                                 <div className="assTopActions">
                                     <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Add Asset</button>
+                                    <input
+                                        className="pageSearchInput"
+                                        type="search"
+                                        placeholder="Search assets..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
                                     <select
                                         className="assOfficeSelect"
                                         value={selectedOffice}
@@ -87,35 +162,37 @@ export default function Assets() {
 
                         <section className="assGrid">
                             <div className="assCard">
-                                <table className="assTable">
-                                    <thead>
-                                        <tr className="tabRow">
-                                            <th>Name</th>
-                                            <th>Asset ID</th>
-                                            <th>Current Assignment</th>
-                                            <th>Location</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {filteredAssets.map((asset) => (
-                                            <tr className="tabRow" key={asset.id}>
-                                                <td>{asset.name}</td>
-                                                <td>{asset.id}</td>
-                                                <td>{asset.assignment}</td>
-                                                <td>{asset.location}</td>
-                                                <td>{asset.status}</td>
+                                <div className="assTableWrap">
+                                    <table className="assTable">
+                                        <thead>
+                                            <tr className="tabRow">
+                                                <th><button type="button" className="tableSortBtn" onClick={() => handleSort('name')}>Name</button></th>
+                                                <th><button type="button" className="tableSortBtn" onClick={() => handleSort('assetId')}>Asset ID</button></th>
+                                                <th><button type="button" className="tableSortBtn" onClick={() => handleSort('assignment')}>Current Assignment</button></th>
+                                                <th><button type="button" className="tableSortBtn" onClick={() => handleSort('location')}>Location</button></th>
+                                                <th><button type="button" className="tableSortBtn" onClick={() => handleSort('status')}>Status</button></th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {sortedAssets.map((asset) => (
+                                                <tr className="tabRow" key={asset.id}>
+                                                    <td>{asset.name}</td>
+                                                    <td>{asset.assetId}</td>
+                                                    <td>{asset.assignment}</td>
+                                                    <td>{asset.location}</td>
+                                                    <td>{asset.status}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
 
                             <aside className="assrightCard">
                                 <p className="assrightTitle">Current Asset Assignments ({selectedOffice})</p>
                                 <ul className="assAssignList">
-                                    {filteredAssets.map((asset) => (
-                                        <li key={`${asset.id}-assn`}>
+                                    {searchFilteredAssets.map((asset) => (
+                                        <li key={`${asset.assetId}-assn`}>
                                             <span>{asset.name}</span>
                                             <span>{asset.assignment}</span>
                                         </li>
@@ -123,6 +200,9 @@ export default function Assets() {
                                 </ul>
                             </aside>
                         </section>
+
+                        {isLoading && <p className="assHeading">Loading assets...</p>}
+                        {!isLoading && fetchError && <p className="assHeading">{fetchError}</p>}
 
                         {showForm && (
                             <div className="entryModalBackdrop" onClick={() => setShowForm(false)}>
@@ -133,12 +213,16 @@ export default function Assets() {
                                     </div>
                                     <form className="entryForm" onSubmit={handleSubmit}>
                                         <label>
+                                            Asset ID
+                                            <input name="assetId" value={form.assetId} onChange={handleChange} required />
+                                        </label>
+                                        <label>
                                             Asset name
                                             <input name="name" value={form.name} onChange={handleChange} required />
                                         </label>
                                         <label>
-                                            Current assignment (skip if none)
-                                            <input name="assignment" value={form.assignment} onChange={handleChange} />
+                                            Assigned staff DB ID (optional)
+                                            <input name="assignedTo" type="number" min="1" value={form.assignedTo} onChange={handleChange} />
                                         </label>
                                         <label>
                                             Location
@@ -153,7 +237,9 @@ export default function Assets() {
                                                 <option>Critical Alert</option>
                                             </select>
                                         </label>
-                                        <button type="submit" className="entrySubmitBtn">Save Asset</button>
+                                        <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
+                                            {isSubmitting ? 'Saving...' : 'Save Asset'}
+                                        </button>
                                     </form>
                                 </div>
                             </div>
