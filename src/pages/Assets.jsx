@@ -15,6 +15,18 @@ function normalizeAsset(item) {
     };
 }
 
+async function getErrorMessage(response, fallback) {
+    try {
+        const data = await response.json();
+        if (typeof data === 'string') return data;
+        if (data.detail) return `${fallback} (${response.status}): ${data.detail}`;
+        return `${fallback} (${response.status}): ${JSON.stringify(data)}`;
+    } catch {
+        const text = await response.text();
+        return `${fallback} (${response.status}): ${text || response.statusText}`;
+    }
+}
+
 export default function Assets() {
     const [assets, setAssets] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -39,11 +51,13 @@ export default function Assets() {
             setFetchError('');
             try {
                 const response = await fetch(`${API_BASE_URL}/api/assets/`);
-                if (!response.ok) throw new Error('Failed to load assets');
+                if (!response.ok) {
+                    throw new Error(await getErrorMessage(response, 'Failed to load assets'));
+                }
                 const data = await response.json();
                 setAssets(data.map(normalizeAsset));
             } catch (error) {
-                setFetchError(error.message || 'Unable to fetch assets.');
+                setFetchError(error.message || `Unable to fetch assets from ${API_BASE_URL}.`);
             } finally {
                 setIsLoading(false);
             }
@@ -74,7 +88,9 @@ export default function Assets() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
-            if (!response.ok) throw new Error('Failed to save asset.');
+            if (!response.ok) {
+                throw new Error(await getErrorMessage(response, 'Failed to save asset'));
+            }
 
             const created = await response.json();
             setAssets((prev) => [normalizeAsset(created), ...prev]);
