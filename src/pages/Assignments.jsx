@@ -16,7 +16,6 @@ function normalizeAssignment(item) {
     assignedOn: item.date_assigned,
     returnBy: item.return_date || '',
     status: item.status,
-    approvedBy: item.approved_by || '-',
   };
 }
 
@@ -35,7 +34,6 @@ export default function Assignments() {
     assignedOn: '',
     returnBy: '',
     status: 'Active',
-    approvedBy: '',
   });
 
   useEffect(() => {
@@ -73,7 +71,6 @@ export default function Assignments() {
         date_assigned: form.assignedOn,
         return_date: form.returnBy || null,
         status: form.status,
-        approved_by: form.approvedBy,
       };
       const response = await fetch(`${API_BASE_URL}/api/assignments/`, {
         method: 'POST',
@@ -91,7 +88,6 @@ export default function Assignments() {
         assignedOn: '',
         returnBy: '',
         status: 'Active',
-        approvedBy: '',
       });
       setShowForm(false);
     } catch (error) {
@@ -247,7 +243,6 @@ export default function Assignments() {
                         <th>Assigned On</th>
                         <th>Return By</th>
                         <th>Status</th>
-                        <th>Approved By</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -259,12 +254,11 @@ export default function Assignments() {
                           <td>{item.assignedOn}</td>
                           <td>{item.returnBy}</td>
                           <td><span className={`asnBadge asnBadge${item.status.replace(' ', '')}`}>{item.status}</span></td>
-                          <td>{item.approvedBy}</td>
                         </tr>
                       ))}
                       {viewRows.length === 0 && (
                         <tr>
-                          <td className="asnEmptyRow" colSpan={7}>No assignments in this section.</td>
+                          <td className="asnEmptyRow" colSpan={6}>No assignments in this section.</td>
                         </tr>
                       )}
                     </tbody>
@@ -308,10 +302,6 @@ export default function Assignments() {
                         <option>In Review</option>
                         <option>Returned</option>
                       </select>
-                    </label>
-                    <label>
-                      Approved by
-                      <input name="approvedBy" value={form.approvedBy} onChange={handleChange} />
                     </label>
                     <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
                       {isSubmitting ? 'Saving...' : 'Save Assignment'}

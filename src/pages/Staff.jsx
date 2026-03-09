@@ -4,14 +4,30 @@ import PageSidebar from '../components/PageSidebar';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
-function normalizeStaff(item) {
+function buildAssignmentMap(assets) {
+  const map = new Map();
+
+  assets.forEach((asset) => {
+    if (!asset.assigned_to_staff_id) return;
+    const staffId = String(asset.assigned_to_staff_id).trim();
+    const label = `${asset.name}${asset.asset_id ? ` (${asset.asset_id})` : ''}`;
+    if (!map.has(staffId)) map.set(staffId, []);
+    map.get(staffId).push(label);
+  });
+
+  return map;
+}
+
+function normalizeStaff(item, assignmentMap) {
+  const assignedAssets = assignmentMap.get(String(item.staff_id).trim()) || [];
+
   return {
     pk: item.id,
     id: item.staff_id,
     name: item.name,
     office: item.office,
     title: item.job_title,
-    assignment: 'Unassigned',
+    assignment: assignedAssets.length > 0 ? assignedAssets.join(', ') : 'Unassigned',
   };
 }
 
@@ -37,10 +53,17 @@ export default function Staff() {
       setIsLoading(true);
       setFetchError('');
       try {
-        const response = await fetch(`${API_BASE_URL}/api/staff/`);
-        if (!response.ok) throw new Error('Failed to load staff.');
-        const data = await response.json();
-        setStaffDirectory(data.map(normalizeStaff));
+        const [staffResponse, assetsResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/staff/`),
+          fetch(`${API_BASE_URL}/api/assets/`),
+        ]);
+        if (!staffResponse.ok) throw new Error('Failed to load staff.');
+        if (!assetsResponse.ok) throw new Error('Failed to load assets for assignment mapping.');
+
+        const staffData = await staffResponse.json();
+        const assetsData = await assetsResponse.json();
+        const assignmentMap = buildAssignmentMap(assetsData);
+        setStaffDirectory(staffData.map((row) => normalizeStaff(row, assignmentMap)));
       } catch (error) {
         setFetchError(error.message || 'Unable to fetch staff.');
       } finally {
@@ -74,7 +97,7 @@ export default function Staff() {
       if (!response.ok) throw new Error('Failed to save staff.');
 
       const created = await response.json();
-      setStaffDirectory((prev) => [normalizeStaff(created), ...prev]);
+      setStaffDirectory((prev) => [normalizeStaff(created, new Map()), ...prev]);
       setForm({ staffId: '', name: '', office: '', title: '' });
       setShowForm(false);
     } catch (error) {
