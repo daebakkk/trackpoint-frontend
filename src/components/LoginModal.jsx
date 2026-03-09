@@ -1,13 +1,47 @@
 import { useState } from 'react';
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
 export default function LoginModal({ onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState({
+    username: '',
+    password: '',
+  });
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
 
   async function handleSubmit(event) {
     event.preventDefault();
+    setError('');
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setIsSubmitting(false);
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/token/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: form.username.trim(),
+          password: form.password,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.detail || 'Invalid login credentials.');
+      }
+
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+      onClose();
+      window.location.href = '/dashboard';
+    } catch (err) {
+      setError(err.message || 'Unable to log in.');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -21,13 +55,14 @@ export default function LoginModal({ onClose }) {
 
         <form className="loginForm" onSubmit={handleSubmit}>
           <label>
-            Work email
-            <input type="email" placeholder="name@company.com" required />
+            Username / Employee ID
+            <input name="username" type="text" placeholder="e.g. 0312" value={form.username} onChange={handleChange} required />
           </label>
           <label>
             Password
-            <input type="password" placeholder="Enter password" required />
+            <input name="password" type="password" placeholder="Enter password" value={form.password} onChange={handleChange} required />
           </label>
+          {error && <p className="formError">{error}</p>}
           <button type="submit" className="loginSubmitBtn" disabled={isSubmitting}>
             {isSubmitting ? 'Signing In...' : 'Continue'}
           </button>

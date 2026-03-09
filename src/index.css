@@ -564,6 +564,27 @@ body {
   background-color: var(--highlights-color);
 }
 
+.formError,
+.formSuccess {
+  margin: 0.2rem 0 0;
+  padding: 0.45rem 0.55rem;
+  border-radius: 0.45rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.formError {
+  color: #fecaca;
+  background: rgba(244, 63, 94, 0.2);
+  border: 1px solid rgba(244, 63, 94, 0.45);
+}
+
+.formSuccess {
+  color: #bbf7d0;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.45);
+}
+
 @media (max-width: 980px) {
   .landingFeatureGrid {
     grid-template-columns: 1fr;
