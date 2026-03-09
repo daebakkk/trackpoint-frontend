@@ -42,7 +42,7 @@ export default function Assets() {
         name: '',
         location: '',
         status: 'Good condition',
-        assignedTo: '',
+        assignedToStaffId: '',
     });
 
     useEffect(() => {
@@ -80,8 +80,25 @@ export default function Assets() {
                 name: form.name,
                 location: form.location,
                 status: form.status,
-                assigned_to: form.assignedTo ? Number(form.assignedTo) : null,
+                assigned_to: null,
             };
+
+            if (form.assignedToStaffId.trim()) {
+                const staffResponse = await fetch(
+                    `${API_BASE_URL}/api/staff/?search=${encodeURIComponent(form.assignedToStaffId.trim())}`,
+                );
+                if (!staffResponse.ok) {
+                    throw new Error(await getErrorMessage(staffResponse, 'Failed to validate assigned staff'));
+                }
+                const staffRows = await staffResponse.json();
+                const matchedStaff = staffRows.find(
+                    (row) => String(row.staff_id).trim().toLowerCase() === form.assignedToStaffId.trim().toLowerCase(),
+                );
+                if (!matchedStaff) {
+                    throw new Error(`Staff ID "${form.assignedToStaffId}" does not exist.`);
+                }
+                payload.assigned_to = matchedStaff.id;
+            }
 
             const response = await fetch(`${API_BASE_URL}/api/assets/`, {
                 method: 'POST',
@@ -99,7 +116,7 @@ export default function Assets() {
                 name: '',
                 location: '',
                 status: 'Good condition',
-                assignedTo: '',
+                assignedToStaffId: '',
             });
             setShowForm(false);
         } catch (error) {
@@ -237,8 +254,8 @@ export default function Assets() {
                                             <input name="name" value={form.name} onChange={handleChange} required />
                                         </label>
                                         <label>
-                                            Assigned staff DB ID (optional)
-                                            <input name="assignedTo" type="number" min="1" value={form.assignedTo} onChange={handleChange} />
+                                            Assigned Staff ID (optional)
+                                            <input name="assignedToStaffId" value={form.assignedToStaffId} onChange={handleChange} placeholder="e.g. 0312" />
                                         </label>
                                         <label>
                                             Location
