@@ -6,7 +6,7 @@ export default function LoginModal({ onClose }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
-    username: '',
+    identifier: '',
     password: '',
   });
 
@@ -24,7 +24,7 @@ export default function LoginModal({ onClose }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          username: form.username.trim(),
+          identifier: form.identifier.trim(),
           password: form.password,
         }),
       });
@@ -55,8 +55,8 @@ export default function LoginModal({ onClose }) {
 
         <form className="loginForm" onSubmit={handleSubmit}>
           <label>
-            Username / Employee ID
-            <input name="username" type="text" placeholder="e.g. 0312" value={form.username} onChange={handleChange} required />
+            Work email or Employee ID
+            <input name="identifier" type="text" placeholder="name@company.com or 0312" value={form.identifier} onChange={handleChange} required />
           </label>
           <label>
             Password

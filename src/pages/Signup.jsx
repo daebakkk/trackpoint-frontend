@@ -26,6 +26,10 @@ export default function Signup() {
         event.preventDefault();
         setError('');
         setSuccess('');
+        if (form.password.trim().length < 8) {
+            setError('Password should be at least 8 characters.');
+            return;
+        }
         setIsSubmitting(true);
         try {
             const payload = {
@@ -44,7 +48,19 @@ export default function Signup() {
 
             if (!response.ok) {
                 const data = await response.json().catch(() => ({}));
-                throw new Error(data.detail || JSON.stringify(data) || 'Signup failed.');
+                const passwordError = Array.isArray(data.password) ? data.password[0] : '';
+                if (passwordError) {
+                    throw new Error('Password should be at least 8 characters.');
+                }
+                const emailError = Array.isArray(data.email) ? data.email[0] : '';
+                if (emailError) {
+                    throw new Error('That email is already in use.');
+                }
+                const usernameError = Array.isArray(data.username) ? data.username[0] : '';
+                if (usernameError) {
+                    throw new Error('That employee ID is already in use.');
+                }
+                throw new Error(data.detail || 'Sign up failed. Please check your details.');
             }
 
             setSuccess('Account created successfully. You can log in now.');
