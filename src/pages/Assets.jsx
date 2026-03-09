@@ -254,7 +254,7 @@ export default function Assets() {
                                             <input name="name" value={form.name} onChange={handleChange} required />
                                         </label>
                                         <label>
-                                            Assigned Staff ID (optional)
+                                            Assigned Staff ID (if assigned)
                                             <input name="assignedToStaffId" value={form.assignedToStaffId} onChange={handleChange} placeholder="e.g. 0312" />
                                         </label>
                                         <label>
