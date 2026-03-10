@@ -1,28 +1,104 @@
 import Navbar from '../components/Navbar';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
-const assetLocations = [
-  { asset: 'ASUS 2022 (0567)', building: 'Fifth Lab', floor: 'Floor 2', room: 'Intern Space', holder: 'Abisola Adegboruwa', status: 'Healthy' },
-  { asset: 'DELL 2024 (0182)', building: 'Main Building', floor: 'Floor 1', room: 'IT Support Office', holder: 'Casey Luo', status: 'Attention' },
-  { asset: 'HP i7 (0769)', building: 'Main Building', floor: 'Floor 3', room: 'Training Room', holder: 'Gbemi Oduselu', status: 'Healthy' },
-  { asset: 'MacBook Pro (0243)', building: 'Main Building', floor: 'Floor 2', room: 'HR Office', holder: 'Jada Ricottski', status: 'Review' },
-  { asset: 'Lenovo ThinkPad T14 (0311)', building: 'Main Building', floor: 'Floor 4', room: 'Finance Wing', holder: 'Maya Johnson', status: 'Healthy' },
-  { asset: 'Cisco Catalyst 9200 (0821)', building: 'Data Center', floor: 'Ground', room: 'Server Room B', holder: 'Network Team', status: 'Attention' },
-  { asset: 'Epson Workforce Printer (0675)', building: 'Main Building', floor: 'Floor 1', room: 'Front Office', holder: 'Admin Unit', status: 'Healthy' },
-];
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+function getStatusLabel(status) {
+  const value = (status || '').toLowerCase();
+  if (value.includes('good') || value.includes('working')) return 'Healthy';
+  if (value.includes('repair') || value.includes('critical')) return 'Attention';
+  if (value.includes('lost')) return 'Review';
+  return 'Healthy';
+}
+
+function parseLocation(locationValue) {
+  const raw = (locationValue || '').trim();
+  if (!raw) {
+    return { building: 'Unspecified', floor: '—', room: 'Unassigned Area' };
+  }
+  const floorMatch = raw.match(/Floor\s*\d+/i);
+  const floor = floorMatch ? floorMatch[0].replace(/\s+/g, ' ') : /ground/i.test(raw) ? 'Ground' : '—';
+
+  if (/fifth lab/i.test(raw)) {
+    return {
+      building: 'Fifth Lab',
+      floor,
+      room: raw.replace(/fifth lab/ig, '').replace(/[-–,]/g, '').trim() || 'Fifth Lab',
+    };
+  }
+
+  if (/main building/i.test(raw)) {
+    return {
+      building: 'Main Building',
+      floor,
+      room: raw.replace(/main building/ig, '').replace(/[-–,]/g, '').trim() || 'Main Building',
+    };
+  }
+
+  if (/data center/i.test(raw)) {
+    return {
+      building: 'Data Center',
+      floor,
+      room: raw.replace(/data center/ig, '').replace(/[-–,]/g, '').trim() || 'Data Center',
+    };
+  }
+
+  return { building: 'Office', floor, room: raw };
+}
 
 export default function Location() {
   const [selectedFilter, setSelectedFilter] = useState('All Locations');
   const [searchTerm, setSearchTerm] = useState('');
-  const roomOptions = [...new Set(assetLocations.filter((row) => row.building !== 'Fifth Lab').map((row) => row.room))];
+  const [rows, setRows] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+
+  useEffect(() => {
+    async function loadLocations() {
+      setIsLoading(true);
+      setFetchError('');
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/assets/`);
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || response.statusText);
+        }
+        const assets = await response.json();
+        const mapped = assets.map((asset) => {
+          const locationParts = parseLocation(asset.location);
+          return {
+            id: asset.id,
+            asset: `${asset.name} (${asset.asset_id})`,
+            building: locationParts.building,
+            floor: locationParts.floor,
+            room: locationParts.room || asset.location,
+            holder: asset.assigned_to_name || 'Unassigned',
+            status: getStatusLabel(asset.status),
+          };
+        });
+        setRows(mapped);
+      } catch (error) {
+        setFetchError(error.message || 'Unable to load locations.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadLocations();
+  }, []);
+
+  const roomOptions = useMemo(
+    () => [...new Set(rows.filter((row) => row.building !== 'Fifth Lab').map((row) => row.room))],
+    [rows],
+  );
   const locationOptions = ['All Locations', 'Fifth Lab', ...roomOptions];
   const filteredRows =
     selectedFilter === 'All Locations'
-      ? assetLocations
+      ? rows
       : selectedFilter === 'Fifth Lab'
-        ? assetLocations.filter((row) => row.building === 'Fifth Lab')
-        : assetLocations.filter((row) => row.room === selectedFilter);
+        ? rows.filter((row) => row.building === 'Fifth Lab')
+        : rows.filter((row) => row.room === selectedFilter);
   const searchFilteredRows = filteredRows.filter((row) => {
     const haystack = `${row.asset} ${row.building} ${row.floor} ${row.room} ${row.holder} ${row.status}`.toLowerCase();
     return haystack.includes(searchTerm.trim().toLowerCase());
@@ -82,7 +158,7 @@ export default function Location() {
                   </thead>
                   <tbody>
                     {searchFilteredRows.map((row) => (
-                      <tr key={row.asset}>
+                      <tr key={row.id}>
                         <td>{row.asset}</td>
                         <td>{row.building}</td>
                         <td>{row.floor}</td>
@@ -100,6 +176,9 @@ export default function Location() {
                 </table>
               </div>
             </section>
+
+            {isLoading && <p className="assHeading">Loading locations...</p>}
+            {!isLoading && fetchError && <p className="assHeading">{fetchError}</p>}
           </div>
         </div>
       </main>
