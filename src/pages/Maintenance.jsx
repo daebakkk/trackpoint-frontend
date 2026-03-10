@@ -47,9 +47,20 @@ async function getErrorMessage(response, fallback) {
 function buildTimelineFromTickets(tickets) {
   return tickets.slice(0, 6).map((ticket) => ({
     time: new Date(ticket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    event: `${ticket.ticket_id} created for ${ticket.asset}`,
+    event: `${ticket.ticket_id} created for ${ticket.assetLabel}`,
     level: ticket.lane === 'Critical' ? 'Critical' : ticket.lane === 'Preventive' ? 'Info' : 'Action',
   }));
+}
+
+function formatEta(value) {
+  if (!value) return '';
+  if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return parsed.toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+    }
+  }
+  return value;
 }
 
 export default function Maintenance() {
@@ -58,11 +69,13 @@ export default function Maintenance() {
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [assetsLoading, setAssetsLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
+  const [assets, setAssets] = useState([]);
   const [form, setForm] = useState({
     lane: 'Planned',
     ticket: '',
-    asset: '',
+    assetId: '',
     task: '',
     owner: '',
     eta: '',
@@ -87,12 +100,12 @@ export default function Maintenance() {
   async function handleSubmit(event) {
     event.preventDefault();
     const laneValue = form.lane || 'Planned';
-    const assetValue = form.asset.trim();
+    const assetIdValue = form.assetId.trim();
     const taskValue = form.task.trim();
     const ownerValue = form.owner.trim();
     const etaValue = form.eta.trim();
 
-    if (!assetValue || !taskValue || !ownerValue || !etaValue) {
+    if (!assetIdValue || !taskValue || !ownerValue || !etaValue) {
       return;
     }
 
@@ -107,7 +120,7 @@ export default function Maintenance() {
       const payload = {
         ticket_id: form.ticket.trim() || buildNextTicketId(laneValue, currentTickets),
         lane: laneValue,
-        asset: assetValue,
+        asset_id: assetIdValue,
         task: taskValue,
         owner: ownerValue,
         eta: etaValue,
@@ -123,12 +136,15 @@ export default function Maintenance() {
       }
 
       const created = await createResponse.json();
+      const assetLabel = created.asset_name && created.asset_code
+        ? `${created.asset_name} (${created.asset_code})`
+        : created.asset;
       setMaintenanceLanes((prev) => ({
         ...prev,
         [created.lane]: [
           {
             ticket: created.ticket_id,
-            asset: created.asset,
+            asset: assetLabel,
             task: created.task,
             owner: created.owner,
             eta: created.eta,
@@ -140,7 +156,7 @@ export default function Maintenance() {
       setMaintenanceTimeline((prev) => ([
         {
           time: new Date(created.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          event: `${created.ticket_id} created for ${created.asset}`,
+          event: `${created.ticket_id} created for ${assetLabel}`,
           level: created.lane === 'Critical' ? 'Critical' : created.lane === 'Preventive' ? 'Info' : 'Action',
         },
         ...prev,
@@ -149,7 +165,7 @@ export default function Maintenance() {
       setForm({
         lane: 'Planned',
         ticket: '',
-        asset: '',
+        assetId: '',
         task: '',
         owner: '',
         eta: '',
@@ -165,20 +181,33 @@ export default function Maintenance() {
   useEffect(() => {
     async function loadTickets() {
       setIsLoading(true);
+      setAssetsLoading(true);
       setFetchError('');
       try {
-        const response = await fetch(`${API_BASE_URL}/api/maintenance-tickets/`);
-        if (!response.ok) {
-          throw new Error(await getErrorMessage(response, 'Failed to load maintenance tickets'));
+        const [ticketsResponse, assetsResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/maintenance-tickets/`),
+          fetch(`${API_BASE_URL}/api/assets/`),
+        ]);
+        if (!ticketsResponse.ok) {
+          throw new Error(await getErrorMessage(ticketsResponse, 'Failed to load maintenance tickets'));
         }
-        const data = await response.json();
+        const data = await ticketsResponse.json();
+        if (assetsResponse.ok) {
+          const assetsData = await assetsResponse.json();
+          setAssets(assetsData);
+        } else {
+          setAssets([]);
+        }
         const lanes = data.reduce(
           (acc, ticket) => {
             const laneKey = ticket.lane || 'Planned';
+            const assetLabel = ticket.asset_name && ticket.asset_code
+              ? `${ticket.asset_name} (${ticket.asset_code})`
+              : ticket.asset;
             acc[laneKey] = acc[laneKey] || [];
             acc[laneKey].push({
               ticket: ticket.ticket_id,
-              asset: ticket.asset,
+              asset: assetLabel,
               task: ticket.task,
               owner: ticket.owner,
               eta: ticket.eta,
@@ -189,11 +218,18 @@ export default function Maintenance() {
         );
 
         setMaintenanceLanes(lanes);
-        setMaintenanceTimeline(buildTimelineFromTickets(data));
+        const timelineTickets = data.map((ticket) => ({
+          ...ticket,
+          assetLabel: ticket.asset_name && ticket.asset_code
+            ? `${ticket.asset_name} (${ticket.asset_code})`
+            : ticket.asset,
+        }));
+        setMaintenanceTimeline(buildTimelineFromTickets(timelineTickets));
       } catch (error) {
         setFetchError(error.message || 'Unable to load maintenance tickets.');
       } finally {
         setIsLoading(false);
+        setAssetsLoading(false);
       }
     }
 
@@ -248,7 +284,7 @@ export default function Maintenance() {
                           <article className="mntOpsCard" key={card.ticket}>
                             <div className="mntOpsCardTop">
                               <p>{card.ticket}</p>
-                              <span>{card.eta}</span>
+                              <span>{formatEta(card.eta)}</span>
                             </div>
                             <h4>{card.asset}</h4>
                             <p className="mntOpsTask">{card.task}</p>
@@ -303,8 +339,22 @@ export default function Maintenance() {
                       <input name="ticket" value={form.ticket} onChange={handleChange} placeholder="Leave empty to auto-generate" />
                     </label>
                     <label>
-                      Asset
-                      <input name="asset" value={form.asset} onChange={handleChange} placeholder="e.g. Dell Latitude 7440 (A-1001)" required />
+                      Asset ID
+                      <input
+                        name="assetId"
+                        list="maintenance-asset-options"
+                        value={form.assetId}
+                        onChange={handleChange}
+                        placeholder={assetsLoading ? 'Loading assets...' : 'Select or type an asset ID'}
+                        required
+                      />
+                      <datalist id="maintenance-asset-options">
+                        {assets.map((asset) => (
+                          <option key={asset.id} value={asset.asset_id}>
+                            {asset.name} ({asset.asset_id})
+                          </option>
+                        ))}
+                      </datalist>
                     </label>
                     <label>
                       Task
@@ -316,7 +366,7 @@ export default function Maintenance() {
                     </label>
                     <label>
                       ETA
-                      <input name="eta" value={form.eta} onChange={handleChange} placeholder="e.g. Today 18:30" required />
+                      <input name="eta" type="datetime-local" value={form.eta} onChange={handleChange} required />
                     </label>
                     <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
                       {isSubmitting ? 'Creating...' : 'Create Ticket'}
