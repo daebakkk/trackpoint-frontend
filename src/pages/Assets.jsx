@@ -43,6 +43,7 @@ export default function Assets() {
         location: '',
         status: 'Good condition',
         assignedToStaffId: '',
+
     });
 
     useEffect(() => {

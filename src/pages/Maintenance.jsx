@@ -1,7 +1,10 @@
 import Navbar from '../components/Navbar';
+import { useEffect, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
-const maintenanceLanes = {
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
+
+const initialMaintenanceLanes = {
   Critical: [
     { ticket: 'M-2201', asset: 'DELL 2024 (0182)', task: 'Motherboard diagnostics', owner: 'Casey Luo', eta: 'Today 16:30' },
     { ticket: 'M-2204', asset: 'Cisco Catalyst 9200 (0821)', task: 'Port stability testing', owner: 'Network Team', eta: 'Today 18:00' },
@@ -22,14 +25,181 @@ const machineHealth = [
   { system: 'Print Services', uptime: '97.9%', trend: '+0.1%' },
 ];
 
-const maintenanceTimeline = [
+const initialMaintenanceTimeline = [
   { time: '08:15', event: 'Auto-check completed for 42 devices', level: 'Info' },
   { time: '09:40', event: 'Critical alert raised for Switch Rack 2', level: 'Critical' },
   { time: '10:05', event: 'Battery replacement ticket assigned', level: 'Action' },
   { time: '11:30', event: 'Maintenance window approved by ops lead', level: 'Info' },
 ];
 
+async function getErrorMessage(response, fallback) {
+  try {
+    const data = await response.json();
+    if (typeof data === 'string') return data;
+    if (data.detail) return `${fallback} (${response.status}): ${data.detail}`;
+    return `${fallback} (${response.status}): ${JSON.stringify(data)}`;
+  } catch {
+    const text = await response.text();
+    return `${fallback} (${response.status}): ${text || response.statusText}`;
+  }
+}
+
+function buildTimelineFromTickets(tickets) {
+  return tickets.slice(0, 6).map((ticket) => ({
+    time: new Date(ticket.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    event: `${ticket.ticket_id} created for ${ticket.asset}`,
+    level: ticket.lane === 'Critical' ? 'Critical' : ticket.lane === 'Preventive' ? 'Info' : 'Action',
+  }));
+}
+
 export default function Maintenance() {
+  const [maintenanceLanes, setMaintenanceLanes] = useState(initialMaintenanceLanes);
+  const [maintenanceTimeline, setMaintenanceTimeline] = useState(initialMaintenanceTimeline);
+  const [showForm, setShowForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+  const [form, setForm] = useState({
+    lane: 'Planned',
+    ticket: '',
+    asset: '',
+    task: '',
+    owner: '',
+    eta: '',
+  });
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  function buildNextTicketId(laneValue, existingTickets) {
+    const prefix = laneValue === 'Preventive' ? 'PM-' : 'M-';
+    const allTickets = existingTickets.map((item) => item.ticket_id);
+    const usedNumbers = allTickets
+      .filter((ticket) => ticket.startsWith(prefix))
+      .map((ticket) => Number(ticket.replace(prefix, '')))
+      .filter((num) => Number.isFinite(num));
+    const maxNumber = usedNumbers.length ? Math.max(...usedNumbers) : laneValue === 'Preventive' ? 3100 : 2200;
+    return `${prefix}${maxNumber + 1}`;
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    const laneValue = form.lane || 'Planned';
+    const assetValue = form.asset.trim();
+    const taskValue = form.task.trim();
+    const ownerValue = form.owner.trim();
+    const etaValue = form.eta.trim();
+
+    if (!assetValue || !taskValue || !ownerValue || !etaValue) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFetchError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/maintenance-tickets/`);
+      if (!response.ok) {
+        throw new Error(await getErrorMessage(response, 'Failed to load tickets for ID generation'));
+      }
+      const currentTickets = await response.json();
+      const payload = {
+        ticket_id: form.ticket.trim() || buildNextTicketId(laneValue, currentTickets),
+        lane: laneValue,
+        asset: assetValue,
+        task: taskValue,
+        owner: ownerValue,
+        eta: etaValue,
+      };
+
+      const createResponse = await fetch(`${API_BASE_URL}/api/maintenance-tickets/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!createResponse.ok) {
+        throw new Error(await getErrorMessage(createResponse, 'Failed to create ticket'));
+      }
+
+      const created = await createResponse.json();
+      setMaintenanceLanes((prev) => ({
+        ...prev,
+        [created.lane]: [
+          {
+            ticket: created.ticket_id,
+            asset: created.asset,
+            task: created.task,
+            owner: created.owner,
+            eta: created.eta,
+          },
+          ...(prev[created.lane] || []),
+        ],
+      }));
+
+      setMaintenanceTimeline((prev) => ([
+        {
+          time: new Date(created.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          event: `${created.ticket_id} created for ${created.asset}`,
+          level: created.lane === 'Critical' ? 'Critical' : created.lane === 'Preventive' ? 'Info' : 'Action',
+        },
+        ...prev,
+      ]));
+
+      setForm({
+        lane: 'Planned',
+        ticket: '',
+        asset: '',
+        task: '',
+        owner: '',
+        eta: '',
+      });
+      setShowForm(false);
+    } catch (error) {
+      setFetchError(error.message || 'Unable to create ticket.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  useEffect(() => {
+    async function loadTickets() {
+      setIsLoading(true);
+      setFetchError('');
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/maintenance-tickets/`);
+        if (!response.ok) {
+          throw new Error(await getErrorMessage(response, 'Failed to load maintenance tickets'));
+        }
+        const data = await response.json();
+        const lanes = data.reduce(
+          (acc, ticket) => {
+            const laneKey = ticket.lane || 'Planned';
+            acc[laneKey] = acc[laneKey] || [];
+            acc[laneKey].push({
+              ticket: ticket.ticket_id,
+              asset: ticket.asset,
+              task: ticket.task,
+              owner: ticket.owner,
+              eta: ticket.eta,
+            });
+            return acc;
+          },
+          { Critical: [], Planned: [], Preventive: [] },
+        );
+
+        setMaintenanceLanes(lanes);
+        setMaintenanceTimeline(buildTimelineFromTickets(data));
+      } catch (error) {
+        setFetchError(error.message || 'Unable to load maintenance tickets.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadTickets();
+  }, []);
+
   return (
     <div>
       <header>
@@ -50,7 +220,7 @@ export default function Maintenance() {
               <div>
                 <p className="mntOpsEyebrow">Maintenance Control Board</p>
               </div>
-              <button type="button" className="pageActionBtn">Create Ticket</button>
+              <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Create Ticket</button>
             </section>
 
             <section className="mntOpsHealthGrid">
@@ -108,6 +278,53 @@ export default function Maintenance() {
                 </ul>
               </aside>
             </section>
+
+            {isLoading && <p className="assHeading">Loading tickets...</p>}
+            {!isLoading && fetchError && <p className="assHeading">{fetchError}</p>}
+
+            {showForm && (
+              <div className="entryModalBackdrop" onClick={() => setShowForm(false)}>
+                <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Create maintenance ticket" onClick={(e) => e.stopPropagation()}>
+                  <div className="entryModalHead">
+                    <h2>Create Ticket</h2>
+                    <button type="button" className="entryCloseBtn" onClick={() => setShowForm(false)} aria-label="Close create ticket form">x</button>
+                  </div>
+                  <form className="entryForm" onSubmit={handleSubmit}>
+                    <label>
+                      Lane
+                      <select name="lane" value={form.lane} onChange={handleChange}>
+                        <option>Critical</option>
+                        <option>Planned</option>
+                        <option>Preventive</option>
+                      </select>
+                    </label>
+                    <label>
+                      Ticket ID (optional)
+                      <input name="ticket" value={form.ticket} onChange={handleChange} placeholder="Leave empty to auto-generate" />
+                    </label>
+                    <label>
+                      Asset
+                      <input name="asset" value={form.asset} onChange={handleChange} placeholder="e.g. Dell Latitude 7440 (A-1001)" required />
+                    </label>
+                    <label>
+                      Task
+                      <input name="task" value={form.task} onChange={handleChange} placeholder="e.g. Battery replacement" required />
+                    </label>
+                    <label>
+                      Owner
+                      <input name="owner" value={form.owner} onChange={handleChange} placeholder="e.g. Support Team" required />
+                    </label>
+                    <label>
+                      ETA
+                      <input name="eta" value={form.eta} onChange={handleChange} placeholder="e.g. Today 18:30" required />
+                    </label>
+                    <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
+                      {isSubmitting ? 'Creating...' : 'Create Ticket'}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </main>

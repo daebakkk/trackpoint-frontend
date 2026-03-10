@@ -45,16 +45,7 @@ const reportByRange = {
 
 export default function Reports() {
   const [range, setRange] = useState('This Month');
-  const [searchTerm, setSearchTerm] = useState('');
   const reportRows = useMemo(() => reportByRange[range], [range]);
-  const searchFilteredRows = useMemo(
-    () =>
-      reportRows.filter((row) => {
-        const haystack = `${row.metric} ${row.count} ${row.note} ${row.trend}`.toLowerCase();
-        return haystack.includes(searchTerm.trim().toLowerCase());
-      }),
-    [reportRows, searchTerm],
-  );
 
   return (
     <div>
@@ -74,16 +65,7 @@ export default function Reports() {
           <div className="appPageMain">
             <section className="rptTop">
               <div className="rptTopRow">
-                <div className="assTopActions">
-                  <button type="button" className="pageActionBtn">Create Report</button>
-                  <input
-                    className="pageSearchInput"
-                    type="search"
-                    placeholder="Search report rows..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
+                <button type="button" className="pageActionBtn">Create Report</button>
               </div>
               <div className="rptRangeBar">
                 {ranges.map((item) => (
@@ -111,7 +93,7 @@ export default function Reports() {
                     </tr>
                   </thead>
                   <tbody>
-                    {searchFilteredRows.map((row) => (
+                    {reportRows.map((row) => (
                       <tr key={row.metric}>
                         <td>{row.metric}</td>
                         <td>{row.count}</td>
@@ -119,11 +101,6 @@ export default function Reports() {
                         <td>{row.trend}</td>
                       </tr>
                     ))}
-                    {searchFilteredRows.length === 0 && (
-                      <tr>
-                        <td className="asnEmptyRow" colSpan={4}>No report rows match this search.</td>
-                      </tr>
-                    )}
                   </tbody>
                 </table>
               </div>
