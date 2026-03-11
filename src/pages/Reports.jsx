@@ -3,6 +3,8 @@ import { useMemo, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
 const ranges = ['This Week', 'Last Week', 'This Month', 'Last 3 Months'];
+const departmentLabel = 'Operations + Asset Management';
+const ownerLabel = 'TrackPoint Systems';
 
 const reportByRange = {
   'This Week': [
@@ -46,6 +48,7 @@ const reportByRange = {
 export default function Reports() {
   const [range, setRange] = useState('This Month');
   const reportRows = useMemo(() => reportByRange[range], [range]);
+  const summaryCards = useMemo(() => reportRows.slice(0, 4), [reportRows]);
 
   return (
     <div>
@@ -81,7 +84,45 @@ export default function Reports() {
               </div>
             </section>
 
-            <section className="rptCard">
+            <section className="rptSheet">
+              <div className="rptSheetHero">
+                <div>
+                  <p className="rptSheetEyebrow">Operational Intelligence Report</p>
+                  <h2>{range} Asset Performance Review</h2>
+                  <p className="rptSheetSub">
+                    Consolidated health metrics, maintenance outcomes, and assignment readiness across the asset fleet.
+                  </p>
+                </div>
+                <div className="rptMetaStack">
+                  <div>
+                    <span>Department</span>
+                    <strong>{departmentLabel}</strong>
+                  </div>
+                  <div>
+                    <span>Prepared By</span>
+                    <strong>{ownerLabel}</strong>
+                  </div>
+                  <div>
+                    <span>Report Window</span>
+                    <strong>{range}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rptSummaryGrid">
+                {summaryCards.map((card) => (
+                  <article key={card.metric} className="rptSummaryCard">
+                    <p>{card.metric}</p>
+                    <h3>{card.count}</h3>
+                    <span>{card.note}</span>
+                  </article>
+                ))}
+              </div>
+
+              <div className="rptSectionHeader">
+                <h3>Key Metrics</h3>
+                <span>Performance Breakdown</span>
+              </div>
               <div className="rptTableWrap">
                 <table className="rptTable">
                   <thead>
