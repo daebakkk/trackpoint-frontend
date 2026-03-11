@@ -1839,7 +1839,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  justify-content: flex-start;
+  justify-content: flex-end;
   align-items: center;
 }
 
@@ -2877,7 +2877,7 @@ body {
 }
 
 .rptSheetSub {
-  color: #cbd5f5;
+  color: #dbe2f3;
   max-width: 520px;
 }
 
@@ -2980,14 +2980,6 @@ body {
 
 .rptRangeSelect {
   min-width: 220px;
-  background: var(--primary-color);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.22);
-}
-
-.rptRangeSelect:focus {
-  border-color: var(--highlights-color);
-  outline: none;
 }
 
 @media (max-width: 900px) {
