@@ -2,7 +2,7 @@ import Navbar from '../components/Navbar';
 import { useMemo, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
-const ranges = ['This Week', 'Last Week', 'This Month', 'Last 3 Months'];
+const ranges = ['This Week', 'Last Week', 'This Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
 const departmentLabel = 'Operations + Asset Management';
 const ownerLabel = 'TrackPoint Systems';
 
@@ -43,6 +43,24 @@ const reportByRange = {
     { metric: 'Unassigned Assets', count: 42, note: 'Assets awaiting assignment over period', trend: '-9 vs prior quarter' },
     { metric: 'Overdue Maintenance', count: 24, note: 'Overdue preventive tasks over period', trend: '-5 vs prior quarter' },
   ],
+  'Last 6 Months': [
+    { metric: 'Good / Working Assets', count: 874, note: 'Average working pool across half-year', trend: '+31 vs prior period' },
+    { metric: 'Assets Repaired', count: 146, note: 'Repairs completed in last 6 months', trend: '+22 vs prior period' },
+    { metric: 'Assets In Repair', count: 54, note: 'Active maintenance backlog', trend: '-6 vs prior period' },
+    { metric: 'Lost Assets', count: 9, note: 'Losses reported in last 6 months', trend: '+2 vs prior period' },
+    { metric: 'Retired Assets', count: 31, note: 'Decommissioned devices in last 6 months', trend: '+6 vs prior period' },
+    { metric: 'Unassigned Assets', count: 83, note: 'Assets awaiting assignment over period', trend: '-12 vs prior period' },
+    { metric: 'Overdue Maintenance', count: 41, note: 'Overdue preventive tasks over period', trend: '-8 vs prior period' },
+  ],
+  'Last Year': [
+    { metric: 'Good / Working Assets', count: 1732, note: 'Average working pool across the year', trend: '+48 vs prior year' },
+    { metric: 'Assets Repaired', count: 301, note: 'Repairs completed in last year', trend: '+44 vs prior year' },
+    { metric: 'Assets In Repair', count: 92, note: 'Active maintenance backlog', trend: '-10 vs prior year' },
+    { metric: 'Lost Assets', count: 15, note: 'Losses reported in last year', trend: '+3 vs prior year' },
+    { metric: 'Retired Assets', count: 64, note: 'Decommissioned devices in last year', trend: '+12 vs prior year' },
+    { metric: 'Unassigned Assets', count: 148, note: 'Assets awaiting assignment over period', trend: '-21 vs prior year' },
+    { metric: 'Overdue Maintenance', count: 77, note: 'Overdue preventive tasks over period', trend: '-14 vs prior year' },
+  ],
 };
 
 export default function Reports() {
@@ -71,16 +89,19 @@ export default function Reports() {
                 <button type="button" className="pageActionBtn">Create Report</button>
               </div>
               <div className="rptRangeBar">
-                {ranges.map((item) => (
-                  <button
-                    key={item}
-                    type="button"
-                    className={`rptRangeBtn ${range === item ? 'rptRangeBtnActive' : ''}`}
-                    onClick={() => setRange(item)}
-                  >
-                    {item}
-                  </button>
-                ))}
+                <label className="rptRangeLabel" htmlFor="report-range">Time Range</label>
+                <select
+                  id="report-range"
+                  className="assOfficeSelect rptRangeSelect"
+                  value={range}
+                  onChange={(event) => setRange(event.target.value)}
+                >
+                  {ranges.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
               </div>
             </section>
 

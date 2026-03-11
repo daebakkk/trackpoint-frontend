@@ -2842,19 +2842,19 @@ body {
 }
 
 .rptSheet {
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--primary-color);
+  color: #ffffff;
   border-radius: 18px;
   padding: 2.5rem;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.15);
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.2);
 }
 
 .rptSheetHero {
   display: flex;
   justify-content: space-between;
   gap: 2rem;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.12);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   padding-bottom: 1.5rem;
   margin-bottom: 1.8rem;
 }
@@ -2864,18 +2864,18 @@ body {
   letter-spacing: 0.14em;
   font-size: 0.7rem;
   font-weight: 600;
-  color: #1d4ed8;
+  color: var(--highlights-color);
   margin-bottom: 0.5rem;
 }
 
 .rptSheetHero h2 {
   font-size: 2rem;
   margin: 0 0 0.6rem;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .rptSheetSub {
-  color: #475569;
+  color: #cbd5f5;
   max-width: 520px;
 }
 
@@ -2890,13 +2890,13 @@ body {
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: #64748b;
+  color: #94a3b8;
   margin-bottom: 0.25rem;
 }
 
 .rptMetaStack strong {
   font-size: 0.95rem;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .rptSummaryGrid {
@@ -2907,27 +2907,27 @@ body {
 }
 
 .rptSummaryCard {
-  background: #ffffff;
+  background: var(--secondary-color);
   border-radius: 14px;
   padding: 1.25rem 1.2rem;
-  border: 1px solid rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
 .rptSummaryCard p {
   font-size: 0.85rem;
-  color: #475569;
+  color: #dbe2f3;
   margin-bottom: 0.8rem;
 }
 
 .rptSummaryCard h3 {
   font-size: 1.8rem;
   margin: 0 0 0.4rem;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .rptSummaryCard span {
-  color: #1d4ed8;
+  color: var(--highlights-color);
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -2942,32 +2942,42 @@ body {
 .rptSectionHeader h3 {
   margin: 0;
   font-size: 1.2rem;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .rptSectionHeader span {
-  color: #64748b;
+  color: #cbd5f5;
   font-size: 0.85rem;
 }
 
 .rptSheet .rptTable {
   border-collapse: collapse;
   width: 100%;
-  background: #ffffff;
+  background: var(--primary-color);
   border-radius: 12px;
   overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .rptSheet .rptTable thead th {
-  background: #e2e8f0;
-  color: #0f172a;
+  background: rgba(37, 99, 235, 0.2);
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.85rem;
 }
 
 .rptSheet .rptTable tbody td {
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
-  color: #1f2937;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+}
+
+.rptRangeLabel {
+  color: #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.rptRangeSelect {
+  min-width: 220px;
 }
 
 @media (max-width: 900px) {
