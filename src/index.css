@@ -1839,6 +1839,8 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .rptRangeBtn {
@@ -2907,16 +2909,16 @@ body {
 }
 
 .rptSummaryCard {
-  background: var(--secondary-color);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 14px;
   padding: 1.25rem 1.2rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
 }
 
 .rptSummaryCard p {
   font-size: 0.85rem;
-  color: #dbe2f3;
+  color: #cbd5f5;
   margin-bottom: 0.8rem;
 }
 
@@ -2927,7 +2929,7 @@ body {
 }
 
 .rptSummaryCard span {
-  color: var(--highlights-color);
+  color: #93c5fd;
   font-size: 0.78rem;
   font-weight: 600;
 }
@@ -2972,12 +2974,20 @@ body {
 }
 
 .rptRangeLabel {
-  color: #e2e8f0;
+  color: #cbd5f5;
   font-size: 0.85rem;
 }
 
 .rptRangeSelect {
   min-width: 220px;
+  background: var(--primary-color);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.rptRangeSelect:focus {
+  border-color: var(--highlights-color);
+  outline: none;
 }
 
 @media (max-width: 900px) {
