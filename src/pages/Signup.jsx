@@ -64,7 +64,7 @@ export default function Signup() {
             }
 
             setSuccess('Account created successfully. You can log in now.');
-            setTimeout(() => navigate('/'), 800);
+            setTimeout(() => navigate('/?login=1'), 800);
         } catch (err) {
             setError(err.message || 'Unable to sign up.');
         } finally {

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import LoginModal from '../components/LoginModal';
 
 const featureCards = [
@@ -57,6 +57,14 @@ const faqRows = [
 
 export default function Landingpg() {
     const [showLogin, setShowLogin] = useState(false);
+    const location = useLocation();
+
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        if (params.get('login') === '1') {
+            setShowLogin(true);
+        }
+    }, [location.search]);
 
     return (
         <div className="landingShell">
@@ -70,7 +78,6 @@ export default function Landingpg() {
                     <div className="landingActions">
                         <Link className="lpButton lpButtonPrimary" to="/signup">Get Started</Link>
                         <button type="button" className="lpButton lpButtonGhost" onClick={() => setShowLogin(true)}>Log In</button>
-                        <Link className="lpButton lpButtonGhost" to="/dashboard">View Dashboard</Link>
                     </div>
                     <div className="landingStats">
                         <div>

@@ -1,71 +1,219 @@
 import Navbar from '../components/Navbar';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 const ranges = ['This Week', 'Last Week', 'This Month', 'Last 3 Months', 'Last 6 Months', 'Last Year'];
 const departmentLabel = 'Operations + Asset Management';
 const ownerLabel = 'TrackPoint Systems';
 
-const reportByRange = {
-  'This Week': [
-    { metric: 'Good / Working Assets', count: 148, note: 'Assets currently available and functioning', trend: '+2 this week' },
-    { metric: 'Assets Repaired', count: 9, note: 'Repairs completed in the current week', trend: '+3 vs last week' },
-    { metric: 'Assets In Repair', count: 11, note: 'Currently in maintenance queue', trend: '-2 this week' },
-    { metric: 'Lost Assets', count: 1, note: 'Reported lost this week', trend: '+1 this week' },
-    { metric: 'Retired Assets', count: 2, note: 'Devices retired this week', trend: '+1 this week' },
-    { metric: 'Unassigned Assets', count: 14, note: 'Available assets not assigned to staff', trend: '-2 this week' },
-    { metric: 'Overdue Maintenance', count: 8, note: 'Assets past preventive maintenance date', trend: '-1 this week' },
-  ],
-  'Last Week': [
-    { metric: 'Good / Working Assets', count: 146, note: 'Assets currently available and functioning', trend: '+1 last week' },
-    { metric: 'Assets Repaired', count: 6, note: 'Repairs completed in last week', trend: '-1 vs previous week' },
-    { metric: 'Assets In Repair', count: 13, note: 'Maintenance queue at week close', trend: '+1 last week' },
-    { metric: 'Lost Assets', count: 0, note: 'No loss reported in that week', trend: 'No change' },
-    { metric: 'Retired Assets', count: 1, note: 'Devices retired in last week', trend: 'No change' },
-    { metric: 'Unassigned Assets', count: 16, note: 'Assets awaiting assignment', trend: '+1 last week' },
-    { metric: 'Overdue Maintenance', count: 9, note: 'Assets past preventive maintenance date', trend: '+1 last week' },
-  ],
-  'This Month': [
-    { metric: 'Good / Working Assets', count: 148, note: 'Assets currently available and functioning', trend: '+6 this month' },
-    { metric: 'Assets Repaired', count: 27, note: 'Completed repairs in the current month', trend: '+4 vs last month' },
-    { metric: 'Assets In Repair', count: 11, note: 'Currently in maintenance queue', trend: '-3 this month' },
-    { metric: 'Lost Assets', count: 2, note: 'Marked as lost this month', trend: '+1 this month' },
-    { metric: 'Retired Assets', count: 5, note: 'Devices decommissioned from active use', trend: '+2 this month' },
-    { metric: 'Unassigned Assets', count: 14, note: 'Available assets not assigned to staff', trend: '-5 this month' },
-    { metric: 'Overdue Maintenance', count: 8, note: 'Assets due for preventive maintenance', trend: '-2 this month' },
-  ],
-  'Last 3 Months': [
-    { metric: 'Good / Working Assets', count: 436, note: 'Average working pool across the quarter', trend: '+18 vs prior quarter' },
-    { metric: 'Assets Repaired', count: 74, note: 'Repairs completed in last 3 months', trend: '+11 vs prior quarter' },
-    { metric: 'Assets In Repair', count: 31, note: 'Active maintenance backlog', trend: '-4 vs prior quarter' },
-    { metric: 'Lost Assets', count: 5, note: 'Losses reported in last 3 months', trend: '+1 vs prior quarter' },
-    { metric: 'Retired Assets', count: 19, note: 'Decommissioned devices in last 3 months', trend: '+3 vs prior quarter' },
-    { metric: 'Unassigned Assets', count: 42, note: 'Assets awaiting assignment over period', trend: '-9 vs prior quarter' },
-    { metric: 'Overdue Maintenance', count: 24, note: 'Overdue preventive tasks over period', trend: '-5 vs prior quarter' },
-  ],
-  'Last 6 Months': [
-    { metric: 'Good / Working Assets', count: 874, note: 'Average working pool across half-year', trend: '+31 vs prior period' },
-    { metric: 'Assets Repaired', count: 146, note: 'Repairs completed in last 6 months', trend: '+22 vs prior period' },
-    { metric: 'Assets In Repair', count: 54, note: 'Active maintenance backlog', trend: '-6 vs prior period' },
-    { metric: 'Lost Assets', count: 9, note: 'Losses reported in last 6 months', trend: '+2 vs prior period' },
-    { metric: 'Retired Assets', count: 31, note: 'Decommissioned devices in last 6 months', trend: '+6 vs prior period' },
-    { metric: 'Unassigned Assets', count: 83, note: 'Assets awaiting assignment over period', trend: '-12 vs prior period' },
-    { metric: 'Overdue Maintenance', count: 41, note: 'Overdue preventive tasks over period', trend: '-8 vs prior period' },
-  ],
-  'Last Year': [
-    { metric: 'Good / Working Assets', count: 1732, note: 'Average working pool across the year', trend: '+48 vs prior year' },
-    { metric: 'Assets Repaired', count: 301, note: 'Repairs completed in last year', trend: '+44 vs prior year' },
-    { metric: 'Assets In Repair', count: 92, note: 'Active maintenance backlog', trend: '-10 vs prior year' },
-    { metric: 'Lost Assets', count: 15, note: 'Losses reported in last year', trend: '+3 vs prior year' },
-    { metric: 'Retired Assets', count: 64, note: 'Decommissioned devices in last year', trend: '+12 vs prior year' },
-    { metric: 'Unassigned Assets', count: 148, note: 'Assets awaiting assignment over period', trend: '-21 vs prior year' },
-    { metric: 'Overdue Maintenance', count: 77, note: 'Overdue preventive tasks over period', trend: '-14 vs prior year' },
-  ],
-};
+function getErrorMessage(response, fallback) {
+  return response.json()
+    .then((data) => {
+      if (typeof data === 'string') return data;
+      if (data.detail) return `${fallback} (${response.status}): ${data.detail}`;
+      return `${fallback} (${response.status}): ${JSON.stringify(data)}`;
+    })
+    .catch(() => response.text().then((text) => `${fallback} (${response.status}): ${text || response.statusText}`));
+}
+
+function startOfDay(date) {
+  const copy = new Date(date);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function endOfDay(date) {
+  const copy = new Date(date);
+  copy.setHours(23, 59, 59, 999);
+  return copy;
+}
+
+function startOfWeek(date) {
+  const copy = startOfDay(date);
+  const day = copy.getDay();
+  const diff = (day + 6) % 7;
+  copy.setDate(copy.getDate() - diff);
+  return copy;
+}
+
+function getRangeWindow(rangeLabel) {
+  const now = new Date();
+  if (rangeLabel === 'This Week') {
+    return { start: startOfWeek(now), end: now };
+  }
+  if (rangeLabel === 'Last Week') {
+    const thisWeekStart = startOfWeek(now);
+    const lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+    const lastWeekEnd = new Date(thisWeekStart);
+    lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+    return { start: startOfDay(lastWeekStart), end: endOfDay(lastWeekEnd) };
+  }
+  if (rangeLabel === 'This Month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1);
+    return { start: startOfDay(start), end: now };
+  }
+  if (rangeLabel === 'Last 3 Months') {
+    const start = new Date(now);
+    start.setMonth(now.getMonth() - 3);
+    return { start: startOfDay(start), end: now };
+  }
+  if (rangeLabel === 'Last 6 Months') {
+    const start = new Date(now);
+    start.setMonth(now.getMonth() - 6);
+    return { start: startOfDay(start), end: now };
+  }
+  const start = new Date(now);
+  start.setFullYear(now.getFullYear() - 1);
+  return { start: startOfDay(start), end: now };
+}
+
+function getPreviousWindow(currentStart, currentEnd) {
+  const duration = currentEnd.getTime() - currentStart.getTime();
+  const previousEnd = new Date(currentStart.getTime() - 1);
+  const previousStart = new Date(previousEnd.getTime() - duration);
+  return { start: previousStart, end: previousEnd };
+}
+
+function parseDate(value) {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatDelta(current, previous) {
+  const delta = current - previous;
+  if (delta === 0) return 'No change vs prior period';
+  return `${delta > 0 ? '+' : ''}${delta} vs prior period`;
+}
 
 export default function Reports() {
   const [range, setRange] = useState('This Month');
-  const reportRows = useMemo(() => reportByRange[range], [range]);
+  const [assets, setAssets] = useState([]);
+  const [tickets, setTickets] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState('');
+
+  useEffect(() => {
+    async function loadReportData() {
+      setIsLoading(true);
+      setFetchError('');
+      try {
+        const [assetsResponse, ticketsResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/assets/`),
+          fetch(`${API_BASE_URL}/api/maintenance-tickets/`),
+        ]);
+        if (!assetsResponse.ok) {
+          throw new Error(await getErrorMessage(assetsResponse, 'Failed to load assets'));
+        }
+        if (!ticketsResponse.ok) {
+          throw new Error(await getErrorMessage(ticketsResponse, 'Failed to load maintenance tickets'));
+        }
+        const assetsData = await assetsResponse.json();
+        const ticketsData = await ticketsResponse.json();
+        setAssets(assetsData);
+        setTickets(ticketsData);
+      } catch (error) {
+        setFetchError(error.message || 'Unable to load report data.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadReportData();
+  }, []);
+
+  const reportRows = useMemo(() => {
+    const { start, end } = getRangeWindow(range);
+    const previousWindow = getPreviousWindow(start, end);
+
+    const workingAssets = assets.filter((asset) => {
+      const status = (asset.status || '').toLowerCase();
+      return status.includes('good') || status.includes('working');
+    }).length;
+    const inRepairAssets = assets.filter((asset) => {
+      const status = (asset.status || '').toLowerCase();
+      return status.includes('repair') || status.includes('critical');
+    }).length;
+    const lostAssets = assets.filter((asset) => (asset.status || '').toLowerCase().includes('lost')).length;
+    const retiredAssets = assets.filter((asset) => {
+      const status = (asset.status || '').toLowerCase();
+      return status.includes('retired') || status.includes('decommission');
+    }).length;
+    const unassignedAssets = assets.filter((asset) => !asset.assigned_to).length;
+
+    const ticketsInRange = tickets.filter((ticket) => {
+      const createdAt = parseDate(ticket.created_at);
+      return createdAt && createdAt >= start && createdAt <= end;
+    }).length;
+    const ticketsPrevious = tickets.filter((ticket) => {
+      const createdAt = parseDate(ticket.created_at);
+      return createdAt && createdAt >= previousWindow.start && createdAt <= previousWindow.end;
+    }).length;
+
+    const preventiveOverdue = tickets.filter((ticket) => {
+      if (ticket.lane !== 'Preventive') return false;
+      const etaDate = parseDate(ticket.eta);
+      if (!etaDate) return false;
+      const createdAt = parseDate(ticket.created_at);
+      return etaDate <= end && (!createdAt || createdAt <= end);
+    }).length;
+    const preventiveOverduePrevious = tickets.filter((ticket) => {
+      if (ticket.lane !== 'Preventive') return false;
+      const etaDate = parseDate(ticket.eta);
+      if (!etaDate) return false;
+      const createdAt = parseDate(ticket.created_at);
+      return etaDate <= previousWindow.end && (!createdAt || createdAt <= previousWindow.end);
+    }).length;
+
+    return [
+      {
+        metric: 'Good / Working Assets',
+        count: workingAssets,
+        note: 'Assets currently available and functioning',
+        trend: 'Live snapshot',
+      },
+      {
+        metric: 'Assets In Repair',
+        count: inRepairAssets,
+        note: 'Assets flagged for repair or critical status',
+        trend: 'Live snapshot',
+      },
+      {
+        metric: 'Maintenance Tickets Opened',
+        count: ticketsInRange,
+        note: `Tickets created between ${start.toLocaleDateString()} and ${end.toLocaleDateString()}`,
+        trend: formatDelta(ticketsInRange, ticketsPrevious),
+      },
+      {
+        metric: 'Lost Assets',
+        count: lostAssets,
+        note: 'Assets marked lost in the registry',
+        trend: 'Live snapshot',
+      },
+      {
+        metric: 'Retired Assets',
+        count: retiredAssets,
+        note: 'Assets marked retired or decommissioned',
+        trend: 'Live snapshot',
+      },
+      {
+        metric: 'Unassigned Assets',
+        count: unassignedAssets,
+        note: 'Assets without an active assignee',
+        trend: 'Live snapshot',
+      },
+      {
+        metric: 'Preventive Tickets Overdue',
+        count: preventiveOverdue,
+        note: `Preventive tickets due by ${end.toLocaleDateString()}`,
+        trend: formatDelta(preventiveOverdue, preventiveOverduePrevious),
+      },
+    ];
+  }, [assets, tickets, range]);
+
   const summaryCards = useMemo(() => reportRows.slice(0, 4), [reportRows]);
 
   return (
@@ -167,6 +315,9 @@ export default function Reports() {
                 </table>
               </div>
             </section>
+
+            {isLoading && <p className="assHeading">Loading report data...</p>}
+            {!isLoading && fetchError && <p className="assHeading">{fetchError}</p>}
           </div>
         </div>
       </main>
