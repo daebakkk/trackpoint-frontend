@@ -37,7 +37,9 @@ export default function Assets() {
     const [sortBy, setSortBy] = useState('name');
     const [sortDir, setSortDir] = useState('asc');
     const [showForm, setShowForm] = useState(false);
+    const [showAssignForm, setShowAssignForm] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isAssigning, setIsAssigning] = useState(false);
     const [form, setForm] = useState({
         assetId: '',
         name: '',
@@ -45,6 +47,10 @@ export default function Assets() {
         status: 'Good condition',
         assignedToStaffId: '',
 
+    });
+    const [assignForm, setAssignForm] = useState({
+        assetId: '',
+        staffId: '',
     });
 
     useEffect(() => {
@@ -79,6 +85,11 @@ export default function Assets() {
     function handleChange(event) {
         const { name, value } = event.target;
         setForm((prev) => ({ ...prev, [name]: value }));
+    }
+
+    function handleAssignChange(event) {
+        const { name, value } = event.target;
+        setAssignForm((prev) => ({ ...prev, [name]: value }));
     }
 
     async function handleSubmit(event) {
@@ -142,6 +153,57 @@ export default function Assets() {
         }
     }
 
+    async function handleAssignSubmit(event) {
+        event.preventDefault();
+        setIsAssigning(true);
+        setFetchError('');
+        try {
+            const assetIdInput = assignForm.assetId.trim().toLowerCase();
+            const staffIdInput = assignForm.staffId.trim().toLowerCase();
+            const assetRow = assets.find(
+                (row) => String(row.assetId).trim().toLowerCase() === assetIdInput,
+            );
+            if (!assetRow) {
+                throw new Error(`Asset ID "${assignForm.assetId}" does not exist.`);
+            }
+            let matchedStaff = staff.find(
+                (row) => String(row.staff_id).trim().toLowerCase() === staffIdInput,
+            );
+            if (!matchedStaff) {
+                const staffResponse = await fetch(
+                    `${API_BASE_URL}/api/staff/?search=${encodeURIComponent(assignForm.staffId.trim())}`,
+                );
+                if (!staffResponse.ok) {
+                    throw new Error(await getErrorMessage(staffResponse, 'Failed to validate assigned staff'));
+                }
+                const staffRows = await staffResponse.json();
+                matchedStaff = staffRows.find(
+                    (row) => String(row.staff_id).trim().toLowerCase() === staffIdInput,
+                );
+            }
+            if (!matchedStaff) {
+                throw new Error(`Staff ID "${assignForm.staffId}" does not exist.`);
+            }
+
+            const response = await fetch(`${API_BASE_URL}/api/assets/${assetRow.id}/`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ assigned_to: matchedStaff.id }),
+            });
+            if (!response.ok) {
+                throw new Error(await getErrorMessage(response, 'Failed to assign asset'));
+            }
+            const updated = await response.json();
+            setAssets((prev) => prev.map((item) => (item.id === updated.id ? normalizeAsset(updated) : item)));
+            setAssignForm({ assetId: '', staffId: '' });
+            setShowAssignForm(false);
+        } catch (error) {
+            setFetchError(error.message || 'Unable to assign asset.');
+        } finally {
+            setIsAssigning(false);
+        }
+    }
+
     const officeOptions = ['All Offices', ...new Set(assets.map((asset) => asset.location))];
     const filteredAssets =
         selectedOffice === 'All Offices'
@@ -187,6 +249,7 @@ export default function Assets() {
                             <div className="assTopRow">
                                 <div className="assTopActions">
                                     <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Add Asset</button>
+                                    <button type="button" className="pageActionBtn" onClick={() => setShowAssignForm(true)}>Assign Asset</button>
                                     <input
                                         className="pageSearchInput"
                                         type="search"
@@ -301,6 +364,58 @@ export default function Assets() {
                                         </label>
                                         <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
                                             {isSubmitting ? 'Saving...' : 'Save Asset'}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        )}
+
+                        {showAssignForm && (
+                            <div className="entryModalBackdrop" onClick={() => setShowAssignForm(false)}>
+                                <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Assign asset" onClick={(e) => e.stopPropagation()}>
+                                    <div className="entryModalHead">
+                                        <h2>Assign Asset</h2>
+                                        <button type="button" className="entryCloseBtn" onClick={() => setShowAssignForm(false)} aria-label="Close assign asset form">x</button>
+                                    </div>
+                                    <form className="entryForm" onSubmit={handleAssignSubmit}>
+                                        <label>
+                                            Asset ID
+                                            <input
+                                                name="assetId"
+                                                list="assign-asset-options"
+                                                value={assignForm.assetId}
+                                                onChange={handleAssignChange}
+                                                placeholder="Select or type an asset ID"
+                                                required
+                                            />
+                                            <datalist id="assign-asset-options">
+                                                {assets.map((asset) => (
+                                                    <option key={asset.id} value={asset.assetId}>
+                                                        {asset.name} ({asset.assetId})
+                                                    </option>
+                                                ))}
+                                            </datalist>
+                                        </label>
+                                        <label>
+                                            Assign to Staff
+                                            <input
+                                                name="staffId"
+                                                list="assign-staff-options"
+                                                value={assignForm.staffId}
+                                                onChange={handleAssignChange}
+                                                placeholder="Select staff ID"
+                                                required
+                                            />
+                                            <datalist id="assign-staff-options">
+                                                {staff.map((person) => (
+                                                    <option key={person.id} value={person.staff_id}>
+                                                        {person.name} ({person.staff_id})
+                                                    </option>
+                                                ))}
+                                            </datalist>
+                                        </label>
+                                        <button type="submit" className="entrySubmitBtn" disabled={isAssigning}>
+                                            {isAssigning ? 'Assigning...' : 'Assign Asset'}
                                         </button>
                                     </form>
                                 </div>
