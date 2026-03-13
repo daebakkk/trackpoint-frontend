@@ -29,6 +29,7 @@ async function getErrorMessage(response, fallback) {
 
 export default function Assets() {
     const [assets, setAssets] = useState([]);
+    const [staff, setStaff] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState('');
     const [selectedOffice, setSelectedOffice] = useState('All Offices');
@@ -51,12 +52,20 @@ export default function Assets() {
             setIsLoading(true);
             setFetchError('');
             try {
-                const response = await fetch(`${API_BASE_URL}/api/assets/`);
-                if (!response.ok) {
-                    throw new Error(await getErrorMessage(response, 'Failed to load assets'));
+                const [assetsResponse, staffResponse] = await Promise.all([
+                    fetch(`${API_BASE_URL}/api/assets/`),
+                    fetch(`${API_BASE_URL}/api/staff/`),
+                ]);
+                if (!assetsResponse.ok) {
+                    throw new Error(await getErrorMessage(assetsResponse, 'Failed to load assets'));
                 }
-                const data = await response.json();
-                setAssets(data.map(normalizeAsset));
+                if (!staffResponse.ok) {
+                    throw new Error(await getErrorMessage(staffResponse, 'Failed to load staff'));
+                }
+                const assetsData = await assetsResponse.json();
+                const staffData = await staffResponse.json();
+                setAssets(assetsData.map(normalizeAsset));
+                setStaff(staffData);
             } catch (error) {
                 setFetchError(error.message || `Unable to fetch assets from ${API_BASE_URL}.`);
             } finally {
@@ -85,16 +94,22 @@ export default function Assets() {
             };
 
             if (form.assignedToStaffId.trim()) {
-                const staffResponse = await fetch(
-                    `${API_BASE_URL}/api/staff/?search=${encodeURIComponent(form.assignedToStaffId.trim())}`,
+                const staffIdInput = form.assignedToStaffId.trim().toLowerCase();
+                let matchedStaff = staff.find(
+                    (row) => String(row.staff_id).trim().toLowerCase() === staffIdInput,
                 );
-                if (!staffResponse.ok) {
-                    throw new Error(await getErrorMessage(staffResponse, 'Failed to validate assigned staff'));
+                if (!matchedStaff) {
+                    const staffResponse = await fetch(
+                        `${API_BASE_URL}/api/staff/?search=${encodeURIComponent(form.assignedToStaffId.trim())}`,
+                    );
+                    if (!staffResponse.ok) {
+                        throw new Error(await getErrorMessage(staffResponse, 'Failed to validate assigned staff'));
+                    }
+                    const staffRows = await staffResponse.json();
+                    matchedStaff = staffRows.find(
+                        (row) => String(row.staff_id).trim().toLowerCase() === staffIdInput,
+                    );
                 }
-                const staffRows = await staffResponse.json();
-                const matchedStaff = staffRows.find(
-                    (row) => String(row.staff_id).trim().toLowerCase() === form.assignedToStaffId.trim().toLowerCase(),
-                );
                 if (!matchedStaff) {
                     throw new Error(`Staff ID "${form.assignedToStaffId}" does not exist.`);
                 }
@@ -256,7 +271,20 @@ export default function Assets() {
                                         </label>
                                         <label>
                                             Assigned Staff ID (if assigned)
-                                            <input name="assignedToStaffId" value={form.assignedToStaffId} onChange={handleChange} placeholder="e.g. 0312" />
+                                            <input
+                                                name="assignedToStaffId"
+                                                list="asset-staff-options"
+                                                value={form.assignedToStaffId}
+                                                onChange={handleChange}
+                                                placeholder="e.g. 0312"
+                                            />
+                                            <datalist id="asset-staff-options">
+                                                {staff.map((person) => (
+                                                    <option key={person.id} value={person.staff_id}>
+                                                        {person.name} ({person.staff_id})
+                                                    </option>
+                                                ))}
+                                            </datalist>
                                         </label>
                                         <label>
                                             Location
