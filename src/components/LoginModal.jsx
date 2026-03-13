@@ -25,6 +25,7 @@ export default function LoginModal({ onClose }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           identifier: form.identifier.trim(),
+          username: form.identifier.trim(),
           password: form.password,
         }),
       });
