@@ -25,16 +25,6 @@ export default function Assignments() {
   const [fetchError, setFetchError] = useState('');
   const [historyRange, setHistoryRange] = useState('Last 3 Months');
   const [activeView, setActiveView] = useState('current');
-  const [showForm, setShowForm] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({
-    assignmentId: '',
-    assetId: '',
-    assigneeId: '',
-    assignedOn: '',
-    returnBy: '',
-    status: 'Active',
-  });
 
   useEffect(() => {
     async function loadAssignments() {
@@ -55,47 +45,6 @@ export default function Assignments() {
     loadAssignments();
   }, []);
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        assignment_id: form.assignmentId,
-        asset: Number(form.assetId),
-        assignee: form.assigneeId ? Number(form.assigneeId) : null,
-        date_assigned: form.assignedOn,
-        return_date: form.returnBy || null,
-        status: form.status,
-      };
-      const response = await fetch(`${API_BASE_URL}/api/assignments/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error('Failed to save assignment.');
-
-      const created = await response.json();
-      setAssignments((prev) => [normalizeAssignment(created), ...prev]);
-      setForm({
-        assignmentId: '',
-        assetId: '',
-        assigneeId: '',
-        assignedOn: '',
-        returnBy: '',
-        status: 'Active',
-      });
-      setShowForm(false);
-    } catch (error) {
-      setFetchError(error.message || 'Unable to save assignment.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
 
   const assignmentStats = useMemo(() => {
     const goodCondition = assignments.filter((item) => item.status === 'Active').length;
@@ -166,7 +115,6 @@ export default function Assignments() {
           <div className="appPageMain">
             <section className="asnTop">
               <div className="asnTopRow">
-                <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Assign</button>
               </div>
               {isLoading && <p className="asnHeading">Loading assignments...</p>}
               {!isLoading && fetchError && <p className="asnHeading">{fetchError}</p>}
@@ -267,49 +215,6 @@ export default function Assignments() {
               </section>
             </section>
 
-            {showForm && (
-              <div className="entryModalBackdrop" onClick={() => setShowForm(false)}>
-                <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Create assignment" onClick={(e) => e.stopPropagation()}>
-                  <div className="entryModalHead">
-                    <h2>Assign Asset</h2>
-                    <button type="button" className="entryCloseBtn" onClick={() => setShowForm(false)} aria-label="Close assignment form">x</button>
-                  </div>
-                  <form className="entryForm" onSubmit={handleSubmit}>
-                    <label>
-                      Assignment ID
-                      <input name="assignmentId" value={form.assignmentId} onChange={handleChange} placeholder="e.g. AS-3001" required />
-                    </label>
-                    <label>
-                      Asset DB ID
-                      <input name="assetId" type="number" min="1" value={form.assetId} onChange={handleChange} required />
-                    </label>
-                    <label>
-                      Assignee DB ID (optional)
-                      <input name="assigneeId" type="number" min="1" value={form.assigneeId} onChange={handleChange} />
-                    </label>
-                    <label>
-                      Assigned on
-                      <input name="assignedOn" type="date" value={form.assignedOn} onChange={handleChange} required />
-                    </label>
-                    <label>
-                      Return by
-                      <input name="returnBy" type="date" value={form.returnBy} onChange={handleChange} required />
-                    </label>
-                    <label>
-                      Status
-                      <select name="status" value={form.status} onChange={handleChange}>
-                        <option>Active</option>
-                        <option>In Review</option>
-                        <option>Returned</option>
-                      </select>
-                    </label>
-                    <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
-                      {isSubmitting ? 'Saving...' : 'Save Assignment'}
-                    </button>
-                  </form>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </main>
