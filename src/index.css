@@ -2300,20 +2300,45 @@ body {
 }
 
 .mntOpsLanes {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
   gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+  scroll-snap-type: x mandatory;
+}
+
+.mntOpsLane {
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+  max-height: 640px;
+  min-width: 260px;
+  flex: 0 0 260px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 0.7rem;
+  padding: 0.6rem 0.6rem 0.4rem;
+  background: rgba(15, 23, 42, 0.35);
+  scroll-snap-align: start;
 }
 
 .mntOpsLane h3 {
   margin: 0 0 0.55rem;
   color: var(--highlights-color);
   font-size: 0.92rem;
+  position: sticky;
+  top: 0;
+  background: rgba(2, 6, 23, 0.75);
+  padding: 0.2rem 0.3rem;
+  border-radius: 0.5rem;
 }
 
 .mntOpsCards {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 0.6rem;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+  flex: 1;
 }
 
 .mntOpsCard {
@@ -2814,7 +2839,7 @@ body {
   }
 
   .mntOpsLanes {
-    grid-template-columns: 1fr;
+    overflow-x: auto;
   }
 }
 
