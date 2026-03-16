@@ -25,6 +25,7 @@ export default function Assignments() {
   const [fetchError, setFetchError] = useState('');
   const [historyRange, setHistoryRange] = useState('Last 3 Months');
   const [activeView, setActiveView] = useState('current');
+  const [endingId, setEndingId] = useState(null);
 
   useEffect(() => {
     async function loadAssignments() {
@@ -44,6 +45,25 @@ export default function Assignments() {
 
     loadAssignments();
   }, []);
+
+  async function handleEndAssignment(item) {
+    setEndingId(item.pk);
+    setFetchError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/assignments/${item.pk}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Returned' }),
+      });
+      if (!response.ok) throw new Error('Failed to close assignment.');
+      const updated = await response.json();
+      setAssignments((prev) => prev.map((row) => (row.pk === updated.id ? normalizeAssignment(updated) : row)));
+    } catch (error) {
+      setFetchError(error.message || 'Unable to close assignment.');
+    } finally {
+      setEndingId(null);
+    }
+  }
 
 
   const assignmentStats = useMemo(() => {
@@ -191,6 +211,7 @@ export default function Assignments() {
                         <th>Assigned On</th>
                         <th>Return By</th>
                         <th>Status</th>
+                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -202,11 +223,25 @@ export default function Assignments() {
                           <td>{item.assignedOn}</td>
                           <td>{item.returnBy}</td>
                           <td><span className={`asnBadge asnBadge${item.status.replace(' ', '')}`}>{item.status}</span></td>
+                          <td>
+                            {item.status !== 'Returned' ? (
+                              <button
+                                type="button"
+                                className="asnActionBtn"
+                                onClick={() => handleEndAssignment(item)}
+                                disabled={endingId === item.pk}
+                              >
+                                {endingId === item.pk ? 'Ending...' : 'End'}
+                              </button>
+                            ) : (
+                              <span className="asnActionMuted">Closed</span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                       {viewRows.length === 0 && (
                         <tr>
-                          <td className="asnEmptyRow" colSpan={6}>No assignments in this section.</td>
+                          <td className="asnEmptyRow" colSpan={7}>No assignments in this section.</td>
                         </tr>
                       )}
                     </tbody>
