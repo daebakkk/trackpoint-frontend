@@ -237,7 +237,6 @@ export default function Reports() {
                 <button type="button" className="pageActionBtn">Create Report</button>
               </div>
               <div className="rptRangeBar">
-                <label className="rptRangeLabel" htmlFor="report-range">Time Range</label>
                 <select
                   id="report-range"
                   className="assOfficeSelect rptRangeSelect"
