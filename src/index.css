@@ -2720,6 +2720,11 @@ body {
   font-weight: 700;
 }
 
+.mntOpsDueTag + .mntOpsCompleteBtn,
+.mntOpsCompleteBtn + .mntOpsDueTag {
+  margin-top: 0.6rem;
+}
+
 .mntOpsDueToday {
   color: #fecaca;
   background: rgba(248, 113, 113, 0.2);
