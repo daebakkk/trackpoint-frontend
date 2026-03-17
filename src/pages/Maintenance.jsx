@@ -85,6 +85,7 @@ export default function Maintenance() {
   const [fetchError, setFetchError] = useState('');
   const [assets, setAssets] = useState([]);
   const [historyRange, setHistoryRange] = useState('Last 30 Days');
+  const [showHistory, setShowHistory] = useState(false);
   const [form, setForm] = useState({
     lane: 'Planned',
     ticket: '',
@@ -307,10 +308,16 @@ export default function Maintenance() {
               <div>
                 <p className="mntOpsEyebrow">Maintenance Control Board</p>
               </div>
-              <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Create Ticket</button>
+              <div className="mntOpsHeroActions">
+                <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Create Ticket</button>
+                <button type="button" className="pageActionBtn mntOpsHistoryBtn" onClick={() => setShowHistory((prev) => !prev)}>
+                  {showHistory ? 'Hide Repair History' : 'Repair History'}
+                </button>
+              </div>
             </section>
 
-            <section className="mntOpsHistory">
+            {showHistory && (
+              <section className="mntOpsHistory">
               <div className="mntOpsHistoryHead">
                 <h3>Repair History</h3>
                 <div className="mntOpsHistoryControls">
@@ -357,9 +364,10 @@ export default function Maintenance() {
                         <span className="mntOpsHistoryMeta">{ticket.completed_at ? new Date(ticket.completed_at).toLocaleString() : 'Completed'}</span>
                       </div>
                     </div>
-                  ))}
+                ))}
               </div>
             </section>
+            )}
 
             <section className="mntOpsHealthGrid">
               {machineHealth.map((item) => (

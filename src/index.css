@@ -2443,6 +2443,18 @@ body {
   margin-bottom: 0.9rem;
 }
 
+.mntOpsHeroActions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mntOpsHistoryBtn {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.6);
+}
+
 .mntOpsEyebrow {
   margin: 0;
   color: var(--highlights-color);
@@ -2630,6 +2642,7 @@ body {
 
 .mntOpsHistory {
   margin-top: 0.9rem;
+  margin-bottom: 1rem;
   background: var(--primary-color);
   border-radius: 0.9rem;
   padding: 1rem;
