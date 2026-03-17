@@ -2117,6 +2117,70 @@ body {
   padding: 0.88rem 0.8rem;
 }
 
+.locHistory {
+  margin-top: 0.9rem;
+  background: var(--primary-color);
+  border-radius: 0.85rem;
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
+}
+
+.locHistoryHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.locHistoryHead h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.locHistoryHead span {
+  color: #bfdbfe;
+  border: 1px solid rgba(191, 219, 254, 0.35);
+  border-radius: 999px;
+  padding: 0.14rem 0.42rem;
+  font-size: 0.74rem;
+}
+
+.locHistoryList {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.locHistoryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(191, 219, 254, 0.2);
+  border-radius: 0.65rem;
+  background: rgba(2, 6, 23, 0.18);
+  color: #e2e8f0;
+}
+
+.locHistoryRow p {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.locHistoryMeta {
+  display: block;
+  margin-top: 0.2rem;
+  color: #93c5fd;
+  font-size: 0.74rem;
+}
+
+.locHistoryEmpty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
 .mntTable thead tr,
 .rptTable thead tr,
 .locTable thead tr {
