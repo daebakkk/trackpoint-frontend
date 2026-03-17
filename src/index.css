@@ -2450,10 +2450,6 @@ body {
   justify-content: flex-end;
 }
 
-.mntOpsHistoryBtn {
-  background: rgba(59, 130, 246, 0.2);
-  border-color: rgba(59, 130, 246, 0.6);
-}
 
 .mntOpsEyebrow {
   margin: 0;
