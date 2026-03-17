@@ -666,6 +666,96 @@ body {
   margin: 0 auto;
   padding: 1.25rem 1rem 2rem;
 }
+
+.setPage {
+  min-height: 100vh;
+  background: var(--bg-color);
+  padding: 1.25rem 0.6rem 2rem 0.4rem;
+  max-width: 1220px;
+  margin: 0 auto 0 0;
+}
+
+.setGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.85rem;
+}
+
+.setCard {
+  background: var(--primary-color);
+  border-radius: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(191, 219, 254, 0.2);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.setCard h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.setField {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.setField label {
+  color: #cbd5e1;
+  font-size: 0.78rem;
+}
+
+.setField input,
+.setField select {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+  border-radius: 0.5rem;
+  padding: 0.56rem 0.65rem;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+}
+
+.setToggle {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: center;
+  border: 1px solid rgba(191, 219, 254, 0.18);
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.6rem;
+  background: rgba(2, 6, 23, 0.18);
+}
+
+.setToggle p {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+}
+
+.setToggle span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.setToggle input {
+  width: 42px;
+  height: 22px;
+}
+
+.setMessage {
+  margin: 0.9rem 0 0;
+  font-size: 0.85rem;
+}
+
+.setMessageError {
+  color: #fecaca;
+}
+
+.setMessageSuccess {
+  color: #bbf7d0;
+}
 .suCard {
   background-color: var(--primary-color);
   padding: 2rem;
@@ -2454,6 +2544,66 @@ body {
 .mntOpsTask {
   margin: 0;
   color: #cbd5e1;
+  font-size: 0.82rem;
+}
+
+.mntOpsCompleteBtn {
+  margin-top: 0.6rem;
+  border: 1px solid rgba(34, 197, 94, 0.5);
+  background: rgba(34, 197, 94, 0.18);
+  color: #bbf7d0;
+  border-radius: 0.45rem;
+  padding: 0.3rem 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.mntOpsCompleteBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.mntOpsHistory {
+  margin-top: 0.9rem;
+  background: var(--primary-color);
+  border-radius: 0.9rem;
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
+}
+
+.mntOpsHistoryList {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.mntOpsHistoryRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid rgba(191, 219, 254, 0.2);
+  border-radius: 0.65rem;
+  background: rgba(2, 6, 23, 0.18);
+  color: #e2e8f0;
+}
+
+.mntOpsHistoryRow p {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.mntOpsHistoryMeta {
+  display: block;
+  margin-top: 0.2rem;
+  color: #93c5fd;
+  font-size: 0.74rem;
+}
+
+.mntOpsHistoryEmpty {
+  margin: 0;
+  color: #94a3b8;
   font-size: 0.82rem;
 }
 

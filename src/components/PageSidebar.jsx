@@ -52,6 +52,11 @@ const actionMap = {
     { label: 'View Dashboard', to: '/dashboard' },
     { label: 'Maintenance', to: '/maintenance' },
   ],
+  Settings: [
+    { label: 'View Dashboard', to: '/dashboard' },
+    { label: 'Review Assets', to: '/assets' },
+    { label: 'Maintenance', to: '/maintenance' },
+  ],
 };
 
 function formatTimeAgo(value) {
@@ -194,6 +199,15 @@ export default function PageSidebar({ context = 'Dashboard' }) {
           `${criticalAssets} assets flagged`,
           `${openAssignments} active assignments`,
           `${locationsCount} locations tracked`,
+        ],
+      },
+      Settings: {
+        status: 'Workspace Settings',
+        metric: `${staffCount} staff profiles`,
+        notes: [
+          `${assetsCount} assets tracked`,
+          `${openAssignments} active assignments`,
+          `${ticketsCount} open tickets`,
         ],
       },
     };

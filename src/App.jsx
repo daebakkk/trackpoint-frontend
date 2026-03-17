@@ -8,6 +8,7 @@ import Maintenance from './pages/Maintenance';
 import Reports from './pages/Reports';
 import Location from './pages/Location';
 import Assignments from './pages/Assignments';
+import Settings from './pages/Settings';
 
 function RequireAuth({ children }) {
   const location = useLocation();
@@ -32,6 +33,7 @@ function App() {
         <Route path="/reports" element={<RequireAuth><Reports /></RequireAuth>} />
         <Route path="/location" element={<RequireAuth><Location /></RequireAuth>} />
         <Route path="/assignments" element={<RequireAuth><Assignments /></RequireAuth>} />
+        <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
       </Routes>
     </Router>
   </>

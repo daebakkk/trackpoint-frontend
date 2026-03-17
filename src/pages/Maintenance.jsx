@@ -6,16 +6,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000
 
 const initialMaintenanceLanes = {
   Critical: [
-    { ticket: 'M-2201', asset: 'DELL 2024 (0182)', task: 'Motherboard diagnostics', owner: 'Casey Luo', eta: 'Today 16:30' },
-    { ticket: 'M-2204', asset: 'Cisco Catalyst 9200 (0821)', task: 'Port stability testing', owner: 'Network Team', eta: 'Today 18:00' },
+    { id: null, ticket: 'M-2201', asset: 'DELL 2024 (0182)', task: 'Motherboard diagnostics', owner: 'Casey Luo', eta: 'Today 16:30' },
+    { id: null, ticket: 'M-2204', asset: 'Cisco Catalyst 9200 (0821)', task: 'Port stability testing', owner: 'Network Team', eta: 'Today 18:00' },
   ],
   Planned: [
-    { ticket: 'M-2202', asset: 'HP EliteBook 850 (0427)', task: 'Battery replacement', owner: 'Noah Patel', eta: 'Tomorrow 11:00' },
-    { ticket: 'M-2205', asset: 'MacBook Pro (0243)', task: 'Display assembly', owner: 'David Kim', eta: 'Mar 04 13:00' },
+    { id: null, ticket: 'M-2202', asset: 'HP EliteBook 850 (0427)', task: 'Battery replacement', owner: 'Noah Patel', eta: 'Tomorrow 11:00' },
+    { id: null, ticket: 'M-2205', asset: 'MacBook Pro (0243)', task: 'Display assembly', owner: 'David Kim', eta: 'Mar 04 13:00' },
   ],
   Preventive: [
-    { ticket: 'PM-3110', asset: 'Server Room B UPS', task: 'Quarterly battery check', owner: 'Ifeoma Chukwu', eta: 'Mar 05 10:00' },
-    { ticket: 'PM-3111', asset: 'Floor 2 Rack', task: 'Cable integrity audit', owner: 'Network Team', eta: 'Mar 06 09:00' },
+    { id: null, ticket: 'PM-3110', asset: 'Server Room B UPS', task: 'Quarterly battery check', owner: 'Ifeoma Chukwu', eta: 'Mar 05 10:00' },
+    { id: null, ticket: 'PM-3111', asset: 'Floor 2 Rack', task: 'Cable integrity audit', owner: 'Network Team', eta: 'Mar 06 09:00' },
   ],
 };
 
@@ -66,8 +66,10 @@ function formatEta(value) {
 export default function Maintenance() {
   const [maintenanceLanes, setMaintenanceLanes] = useState(initialMaintenanceLanes);
   const [maintenanceTimeline, setMaintenanceTimeline] = useState(initialMaintenanceTimeline);
+  const [tickets, setTickets] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCompleting, setIsCompleting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [assetsLoading, setAssetsLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
@@ -97,6 +99,31 @@ export default function Maintenance() {
     return `${prefix}${maxNumber + 1}`;
   }
 
+  function buildLanesFromTickets(data) {
+    return data.reduce(
+      (acc, ticket) => {
+        if (ticket.status === 'Completed') {
+          return acc;
+        }
+        const laneKey = ticket.lane || 'Planned';
+        const assetLabel = ticket.asset_name && ticket.asset_code
+          ? `${ticket.asset_name} (${ticket.asset_code})`
+          : ticket.asset;
+        acc[laneKey] = acc[laneKey] || [];
+        acc[laneKey].push({
+          id: ticket.id,
+          ticket: ticket.ticket_id,
+          asset: assetLabel,
+          task: ticket.task,
+          owner: ticket.owner,
+          eta: ticket.eta,
+        });
+        return acc;
+      },
+      { Critical: [], Planned: [], Preventive: [] },
+    );
+  }
+
   async function handleSubmit(event) {
     event.preventDefault();
     const laneValue = form.lane || 'Planned';
@@ -124,6 +151,7 @@ export default function Maintenance() {
         task: taskValue,
         owner: ownerValue,
         eta: etaValue,
+        status: 'Open',
       };
 
       const createResponse = await fetch(`${API_BASE_URL}/api/maintenance-tickets/`, {
@@ -136,6 +164,7 @@ export default function Maintenance() {
       }
 
       const created = await createResponse.json();
+      setTickets((prev) => [created, ...prev]);
       const assetLabel = created.asset_name && created.asset_code
         ? `${created.asset_name} (${created.asset_code})`
         : created.asset;
@@ -143,6 +172,7 @@ export default function Maintenance() {
         ...prev,
         [created.lane]: [
           {
+            id: created.id,
             ticket: created.ticket_id,
             asset: assetLabel,
             task: created.task,
@@ -178,6 +208,34 @@ export default function Maintenance() {
     }
   }
 
+  async function handleCompleteTicket(card) {
+    if (!card.id) {
+      return;
+    }
+    setIsCompleting(true);
+    setFetchError('');
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/maintenance-tickets/${card.id}/`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'Completed' }),
+      });
+      if (!response.ok) {
+        throw new Error(await getErrorMessage(response, 'Failed to complete ticket'));
+      }
+      const updated = await response.json();
+      setTickets((prev) => {
+        const nextTickets = prev.map((item) => (item.id === updated.id ? updated : item));
+        setMaintenanceLanes(buildLanesFromTickets(nextTickets));
+        return nextTickets;
+      });
+    } catch (error) {
+      setFetchError(error.message || 'Unable to complete ticket.');
+    } finally {
+      setIsCompleting(false);
+    }
+  }
+
   useEffect(() => {
     async function loadTickets() {
       setIsLoading(true);
@@ -198,26 +256,8 @@ export default function Maintenance() {
         } else {
           setAssets([]);
         }
-        const lanes = data.reduce(
-          (acc, ticket) => {
-            const laneKey = ticket.lane || 'Planned';
-            const assetLabel = ticket.asset_name && ticket.asset_code
-              ? `${ticket.asset_name} (${ticket.asset_code})`
-              : ticket.asset;
-            acc[laneKey] = acc[laneKey] || [];
-            acc[laneKey].push({
-              ticket: ticket.ticket_id,
-              asset: assetLabel,
-              task: ticket.task,
-              owner: ticket.owner,
-              eta: ticket.eta,
-            });
-            return acc;
-          },
-          { Critical: [], Planned: [], Preventive: [] },
-        );
-
-        setMaintenanceLanes(lanes);
+        setTickets(data);
+        setMaintenanceLanes(buildLanesFromTickets(data));
         const timelineTickets = data.map((ticket) => ({
           ...ticket,
           assetLabel: ticket.asset_name && ticket.asset_code
@@ -289,6 +329,14 @@ export default function Maintenance() {
                             <h4>{card.asset}</h4>
                             <p className="mntOpsTask">{card.task}</p>
                             <p className="mntOpsOwner">Owner: {card.owner}</p>
+                            <button
+                              type="button"
+                              className="mntOpsCompleteBtn"
+                              disabled={isCompleting}
+                              onClick={() => handleCompleteTicket(card)}
+                            >
+                              Mark Completed
+                            </button>
                           </article>
                         ))}
                       </div>
@@ -313,6 +361,30 @@ export default function Maintenance() {
                   ))}
                 </ul>
               </aside>
+            </section>
+
+            <section className="mntOpsHistory">
+              <div className="mntOpsPanelHead">
+                <h2>Repair History</h2>
+                <span>Completed</span>
+              </div>
+              <div className="mntOpsHistoryList">
+                {tickets.filter((ticket) => ticket.status === 'Completed').length === 0 && (
+                  <p className="mntOpsHistoryEmpty">No completed repairs yet.</p>
+                )}
+                {tickets.filter((ticket) => ticket.status === 'Completed').map((ticket) => (
+                  <div key={ticket.id} className="mntOpsHistoryRow">
+                    <div>
+                      <strong>{ticket.ticket_id}</strong>
+                      <p>{ticket.asset_name ? `${ticket.asset_name} (${ticket.asset_code || ticket.asset_id || ''})` : ticket.asset}</p>
+                    </div>
+                    <div>
+                      <span>{ticket.task}</span>
+                      <span className="mntOpsHistoryMeta">{ticket.completed_at ? new Date(ticket.completed_at).toLocaleString() : 'Completed'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </section>
 
             {isLoading && <p className="assHeading">Loading tickets...</p>}
