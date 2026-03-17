@@ -10,8 +10,10 @@ function normalizeAsset(item) {
         name: item.name,
         assetId: item.asset_id,
         assignment: item.assigned_to_name || 'Unassigned',
+        assignedToStaffId: item.assigned_to_staff_id || '',
         location: item.location,
         status: item.status,
+        createdAt: item.created_at || '',
     };
 }
 
@@ -38,8 +40,10 @@ export default function Assets() {
     const [sortDir, setSortDir] = useState('asc');
     const [showForm, setShowForm] = useState(false);
     const [showAssignForm, setShowAssignForm] = useState(false);
+    const [showDetails, setShowDetails] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAssigning, setIsAssigning] = useState(false);
+    const [isLoadingDetails, setIsLoadingDetails] = useState(false);
     const [form, setForm] = useState({
         assetId: '',
         name: '',
@@ -52,6 +56,9 @@ export default function Assets() {
         assetId: '',
         staffId: '',
     });
+    const [selectedAsset, setSelectedAsset] = useState(null);
+    const [assetAssignments, setAssetAssignments] = useState([]);
+    const [assetTickets, setAssetTickets] = useState([]);
 
     useEffect(() => {
         async function loadAssets() {
@@ -90,6 +97,29 @@ export default function Assets() {
     function handleAssignChange(event) {
         const { name, value } = event.target;
         setAssignForm((prev) => ({ ...prev, [name]: value }));
+    }
+
+    async function openAssetDetails(asset) {
+        setSelectedAsset(asset);
+        setShowDetails(true);
+        setIsLoadingDetails(true);
+        setAssetAssignments([]);
+        setAssetTickets([]);
+        setFetchError('');
+        try {
+            const [assignmentsResponse, ticketsResponse] = await Promise.all([
+                fetch(`${API_BASE_URL}/api/assignments/?search=${encodeURIComponent(asset.assetId)}`),
+                fetch(`${API_BASE_URL}/api/maintenance-tickets/?search=${encodeURIComponent(asset.assetId)}`),
+            ]);
+            const assignmentsData = assignmentsResponse.ok ? await assignmentsResponse.json() : [];
+            const ticketsData = ticketsResponse.ok ? await ticketsResponse.json() : [];
+            setAssetAssignments(assignmentsData);
+            setAssetTickets(ticketsData);
+        } catch (error) {
+            setFetchError(error.message || 'Unable to load asset details.');
+        } finally {
+            setIsLoadingDetails(false);
+        }
     }
 
     async function handleSubmit(event) {
@@ -287,7 +317,7 @@ export default function Assets() {
                                         </thead>
                                         <tbody>
                                             {sortedAssets.map((asset) => (
-                                                <tr className="tabRow" key={asset.id}>
+                                                <tr className="tabRow assClickableRow" key={asset.id} onClick={() => openAssetDetails(asset)}>
                                                     <td>{asset.name}</td>
                                                     <td>{asset.assetId}</td>
                                                     <td>{asset.assignment}</td>
@@ -418,6 +448,71 @@ export default function Assets() {
                                             {isAssigning ? 'Assigning...' : 'Assign Asset'}
                                         </button>
                                     </form>
+                                </div>
+                            </div>
+                        )}
+
+                        {showDetails && selectedAsset && (
+                            <div className="entryModalBackdrop" onClick={() => setShowDetails(false)}>
+                                <div className="entryModalCard assetDetailCard" role="dialog" aria-modal="true" aria-label="Asset details" onClick={(e) => e.stopPropagation()}>
+                                    <div className="entryModalHead">
+                                        <h2>Asset Details</h2>
+                                        <button type="button" className="entryCloseBtn" onClick={() => setShowDetails(false)} aria-label="Close asset details">x</button>
+                                    </div>
+                                    <div className="assetDetailBody">
+                                        <section className="assetDetailSummary">
+                                            <h3>{selectedAsset.name}</h3>
+                                            <p><strong>Asset ID:</strong> {selectedAsset.assetId}</p>
+                                            <p><strong>Status:</strong> {selectedAsset.status}</p>
+                                            <p><strong>Location:</strong> {selectedAsset.location}</p>
+                                            <p><strong>Assigned To:</strong> {selectedAsset.assignment}</p>
+                                            <p><strong>Assigned Staff ID:</strong> {selectedAsset.assignedToStaffId || 'Unassigned'}</p>
+                                            <p><strong>Date Added:</strong> {selectedAsset.createdAt ? new Date(selectedAsset.createdAt).toLocaleString() : 'Unknown'}</p>
+                                        </section>
+
+                                        <section className="assetDetailSection">
+                                            <h4>Current Assignment</h4>
+                                            {assetAssignments.filter((item) => item.status !== 'Returned').length === 0 && (
+                                                <p className="assetDetailEmpty">No active assignments.</p>
+                                            )}
+                                            {assetAssignments.filter((item) => item.status !== 'Returned').map((item) => (
+                                                <div key={item.assignment_id} className="assetDetailRow">
+                                                    <span>{item.assignment_id}</span>
+                                                    <span>{item.assignee_name || 'Unassigned'} ({item.assignee_staff_id || 'N/A'})</span>
+                                                    <span>Assigned: {item.date_assigned}</span>
+                                                </div>
+                                            ))}
+                                        </section>
+
+                                        <section className="assetDetailSection">
+                                            <h4>Previous Assignments</h4>
+                                            {assetAssignments.filter((item) => item.status === 'Returned').length === 0 && (
+                                                <p className="assetDetailEmpty">No previous assignments.</p>
+                                            )}
+                                            {assetAssignments.filter((item) => item.status === 'Returned').map((item) => (
+                                                <div key={item.assignment_id} className="assetDetailRow">
+                                                    <span>{item.assignment_id}</span>
+                                                    <span>{item.assignee_name || 'Unassigned'} ({item.assignee_staff_id || 'N/A'})</span>
+                                                    <span>Returned: {item.return_date || 'N/A'}</span>
+                                                </div>
+                                            ))}
+                                        </section>
+
+                                        <section className="assetDetailSection">
+                                            <h4>Repair History</h4>
+                                            {isLoadingDetails && <p className="assetDetailEmpty">Loading history...</p>}
+                                            {!isLoadingDetails && assetTickets.length === 0 && (
+                                                <p className="assetDetailEmpty">No maintenance tickets found.</p>
+                                            )}
+                                            {!isLoadingDetails && assetTickets.map((ticket) => (
+                                                <div key={ticket.ticket_id} className="assetDetailRow">
+                                                    <span>{ticket.ticket_id}</span>
+                                                    <span>{ticket.task}</span>
+                                                    <span>{ticket.lane}</span>
+                                                </div>
+                                            ))}
+                                        </section>
+                                    </div>
                                 </div>
                             </div>
                         )}

@@ -1370,6 +1370,64 @@ body {
   font-family: 'Manrope', 'Segoe UI', sans-serif;
 }
 
+.assClickableRow {
+  cursor: pointer;
+}
+
+.assClickableRow:hover {
+  background-color: rgba(37, 99, 235, 0.28);
+}
+
+.assetDetailCard {
+  width: min(720px, 96vw);
+  max-height: 85vh;
+  overflow: auto;
+}
+
+.assetDetailBody {
+  display: grid;
+  gap: 1rem;
+}
+
+.assetDetailSummary h3 {
+  margin: 0 0 0.5rem;
+  color: #ffffff;
+  font-size: 1.1rem;
+}
+
+.assetDetailSummary p {
+  margin: 0.2rem 0;
+  color: #cbd5e1;
+  font-size: 0.85rem;
+}
+
+.assetDetailSummary strong {
+  color: #e2e8f0;
+}
+
+.assetDetailSection h4 {
+  margin: 0 0 0.45rem;
+  color: var(--highlights-color);
+  font-size: 0.9rem;
+}
+
+.assetDetailRow {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid rgba(191, 219, 254, 0.15);
+  border-radius: 0.6rem;
+  padding: 0.45rem 0.55rem;
+  background: rgba(2, 6, 23, 0.25);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+}
+
+.assetDetailEmpty {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+}
+
 .entryForm input:focus,
 .entryForm select:focus {
   outline: none;
