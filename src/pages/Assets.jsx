@@ -1,5 +1,5 @@
 import Navbar from '../components/Navbar';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
@@ -59,6 +59,7 @@ export default function Assets() {
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [assetAssignments, setAssetAssignments] = useState([]);
     const [assetTickets, setAssetTickets] = useState([]);
+    const closeTimerRef = useRef(null);
 
     useEffect(() => {
         async function loadAssets() {
@@ -100,6 +101,9 @@ export default function Assets() {
     }
 
     async function openAssetDetails(asset) {
+        if (selectedAsset && selectedAsset.id === asset.id && showDetails) {
+            return;
+        }
         setSelectedAsset(asset);
         setShowDetails(true);
         setIsLoadingDetails(true);
@@ -119,6 +123,22 @@ export default function Assets() {
             setFetchError(error.message || 'Unable to load asset details.');
         } finally {
             setIsLoadingDetails(false);
+        }
+    }
+
+    function scheduleCloseDetails() {
+        if (closeTimerRef.current) {
+            clearTimeout(closeTimerRef.current);
+        }
+        closeTimerRef.current = setTimeout(() => {
+            setShowDetails(false);
+        }, 120);
+    }
+
+    function cancelCloseDetails() {
+        if (closeTimerRef.current) {
+            clearTimeout(closeTimerRef.current);
+            closeTimerRef.current = null;
         }
     }
 
@@ -279,7 +299,6 @@ export default function Assets() {
                             <div className="assTopRow">
                                 <div className="assTopActions">
                                     <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Add Asset</button>
-                                    <button type="button" className="pageActionBtn" onClick={() => setShowAssignForm(true)}>Assign Asset</button>
                                     <input
                                         className="pageSearchInput"
                                         type="search"
@@ -317,7 +336,15 @@ export default function Assets() {
                                         </thead>
                                         <tbody>
                                             {sortedAssets.map((asset) => (
-                                                <tr className="tabRow assClickableRow" key={asset.id} onClick={() => openAssetDetails(asset)}>
+                                                <tr
+                                                    className="tabRow assClickableRow"
+                                                    key={asset.id}
+                                                    onMouseEnter={() => {
+                                                        cancelCloseDetails();
+                                                        openAssetDetails(asset);
+                                                    }}
+                                                    onMouseLeave={scheduleCloseDetails}
+                                                >
                                                     <td>{asset.name}</td>
                                                     <td>{asset.assetId}</td>
                                                     <td>{asset.assignment}</td>
@@ -454,7 +481,15 @@ export default function Assets() {
 
                         {showDetails && selectedAsset && (
                             <div className="entryModalBackdrop" onClick={() => setShowDetails(false)}>
-                                <div className="entryModalCard assetDetailCard" role="dialog" aria-modal="true" aria-label="Asset details" onClick={(e) => e.stopPropagation()}>
+                                <div
+                                    className="entryModalCard assetDetailCard"
+                                    role="dialog"
+                                    aria-modal="true"
+                                    aria-label="Asset details"
+                                    onClick={(e) => e.stopPropagation()}
+                                    onMouseEnter={cancelCloseDetails}
+                                    onMouseLeave={scheduleCloseDetails}
+                                >
                                     <div className="entryModalHead">
                                         <h2>Asset Details</h2>
                                         <button type="button" className="entryCloseBtn" onClick={() => setShowDetails(false)} aria-label="Close asset details">x</button>
@@ -511,6 +546,13 @@ export default function Assets() {
                                                     <span>{ticket.lane}</span>
                                                 </div>
                                             ))}
+                                        </section>
+
+                                        <section className="assetDetailSection">
+                                            <h4>Actions</h4>
+                                            <button type="button" className="pageActionBtn" onClick={() => setShowAssignForm(true)}>
+                                                Assign Asset
+                                            </button>
                                         </section>
                                     </div>
                                 </div>
