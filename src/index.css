@@ -2636,6 +2636,37 @@ body {
   box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
 }
 
+.mntOpsHistoryHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.mntOpsHistoryHead h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.mntOpsHistoryControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mntOpsHistoryControls span {
+  color: #bfdbfe;
+  border: 1px solid rgba(191, 219, 254, 0.35);
+  border-radius: 999px;
+  padding: 0.14rem 0.42rem;
+  font-size: 0.74rem;
+}
+
+.mntOpsRangeSelect {
+  min-width: 140px;
+}
+
 .mntOpsHistoryList {
   display: grid;
   gap: 0.6rem;
@@ -2669,6 +2700,27 @@ body {
   margin: 0;
   color: #94a3b8;
   font-size: 0.82rem;
+}
+
+.mntOpsDueTag {
+  display: inline-block;
+  margin-top: 0.4rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.mntOpsDueToday {
+  color: #fecaca;
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+}
+
+.mntOpsDueTomorrow {
+  color: #fde68a;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.5);
 }
 
 .mntOpsOwner {

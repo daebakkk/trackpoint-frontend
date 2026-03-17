@@ -63,6 +63,16 @@ function formatEta(value) {
   return value;
 }
 
+function parseEtaDate(value) {
+  if (!value) return null;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 export default function Maintenance() {
   const [maintenanceLanes, setMaintenanceLanes] = useState(initialMaintenanceLanes);
   const [maintenanceTimeline, setMaintenanceTimeline] = useState(initialMaintenanceTimeline);
@@ -74,6 +84,7 @@ export default function Maintenance() {
   const [assetsLoading, setAssetsLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
   const [assets, setAssets] = useState([]);
+  const [historyRange, setHistoryRange] = useState('Last 30 Days');
   const [form, setForm] = useState({
     lane: 'Planned',
     ticket: '',
@@ -299,6 +310,57 @@ export default function Maintenance() {
               <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>Create Ticket</button>
             </section>
 
+            <section className="mntOpsHistory">
+              <div className="mntOpsHistoryHead">
+                <h3>Repair History</h3>
+                <div className="mntOpsHistoryControls">
+                  <span>Completed</span>
+                  <select
+                    className="assOfficeSelect mntOpsRangeSelect"
+                    value={historyRange}
+                    onChange={(event) => setHistoryRange(event.target.value)}
+                  >
+                    <option>Last 7 Days</option>
+                    <option>Last 30 Days</option>
+                    <option>Last 90 Days</option>
+                    <option>Last 6 Months</option>
+                  </select>
+                </div>
+              </div>
+              <div className="mntOpsHistoryList">
+                {tickets.filter((ticket) => ticket.status === 'Completed').length === 0 && (
+                  <p className="mntOpsHistoryEmpty">No completed repairs yet.</p>
+                )}
+                {tickets
+                  .filter((ticket) => ticket.status === 'Completed')
+                  .filter((ticket) => {
+                    const completedAt = ticket.completed_at ? new Date(ticket.completed_at) : null;
+                    if (!completedAt || Number.isNaN(completedAt.getTime())) return true;
+                    const now = new Date();
+                    let days = 30;
+                    if (historyRange === 'Last 7 Days') days = 7;
+                    if (historyRange === 'Last 90 Days') days = 90;
+                    if (historyRange === 'Last 6 Months') days = 180;
+                    const cutoff = new Date(now);
+                    cutoff.setDate(now.getDate() - days);
+                    return completedAt >= cutoff;
+                  })
+                  .slice(0, 12)
+                  .map((ticket) => (
+                    <div key={ticket.id} className="mntOpsHistoryRow">
+                      <div>
+                        <strong>{ticket.ticket_id}</strong>
+                        <p>{ticket.asset_name ? `${ticket.asset_name} (${ticket.asset_code || ticket.asset_id || ''})` : ticket.asset}</p>
+                      </div>
+                      <div>
+                        <span>{ticket.task}</span>
+                        <span className="mntOpsHistoryMeta">{ticket.completed_at ? new Date(ticket.completed_at).toLocaleString() : 'Completed'}</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </section>
+
             <section className="mntOpsHealthGrid">
               {machineHealth.map((item) => (
                 <article className="mntOpsHealthCard" key={item.system}>
@@ -329,6 +391,21 @@ export default function Maintenance() {
                             <h4>{card.asset}</h4>
                             <p className="mntOpsTask">{card.task}</p>
                             <p className="mntOpsOwner">Owner: {card.owner}</p>
+                            {(() => {
+                              const etaDate = parseEtaDate(card.eta);
+                              if (!etaDate) return null;
+                              const today = new Date();
+                              const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                              const startOfTomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+                              const startOfDayAfter = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2);
+                              if (etaDate >= startOfToday && etaDate < startOfTomorrow) {
+                                return <span className="mntOpsDueTag mntOpsDueToday">Due Today</span>;
+                              }
+                              if (etaDate >= startOfTomorrow && etaDate < startOfDayAfter) {
+                                return <span className="mntOpsDueTag mntOpsDueTomorrow">Due Tomorrow</span>;
+                              }
+                              return null;
+                            })()}
                             <button
                               type="button"
                               className="mntOpsCompleteBtn"
@@ -361,30 +438,6 @@ export default function Maintenance() {
                   ))}
                 </ul>
               </aside>
-            </section>
-
-            <section className="mntOpsHistory">
-              <div className="mntOpsPanelHead">
-                <h2>Repair History</h2>
-                <span>Completed</span>
-              </div>
-              <div className="mntOpsHistoryList">
-                {tickets.filter((ticket) => ticket.status === 'Completed').length === 0 && (
-                  <p className="mntOpsHistoryEmpty">No completed repairs yet.</p>
-                )}
-                {tickets.filter((ticket) => ticket.status === 'Completed').map((ticket) => (
-                  <div key={ticket.id} className="mntOpsHistoryRow">
-                    <div>
-                      <strong>{ticket.ticket_id}</strong>
-                      <p>{ticket.asset_name ? `${ticket.asset_name} (${ticket.asset_code || ticket.asset_id || ''})` : ticket.asset}</p>
-                    </div>
-                    <div>
-                      <span>{ticket.task}</span>
-                      <span className="mntOpsHistoryMeta">{ticket.completed_at ? new Date(ticket.completed_at).toLocaleString() : 'Completed'}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </section>
 
             {isLoading && <p className="assHeading">Loading tickets...</p>}
