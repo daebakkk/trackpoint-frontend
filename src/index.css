@@ -1476,6 +1476,10 @@ body {
   padding: 1rem;
 }
 
+.entryModalBackdropModal {
+  z-index: 1400;
+}
+
 .entryModalCard {
   width: min(460px, 95vw);
   background: var(--primary-color);
@@ -1549,7 +1553,7 @@ body {
   background-color: rgba(37, 99, 235, 0.28);
 }
 
-.assClickableRow:hover .assIdCell {
+.assClickableRow:hover .assNameCell {
   text-decoration: underline;
 }
 

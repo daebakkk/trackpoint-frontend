@@ -405,8 +405,8 @@ export default function Assets() {
                                                     key={asset.id}
                                                     onClick={() => openAssetDetails(asset)}
                                                 >
-                                                    <td>{asset.name}</td>
-                                                    <td className="assIdCell">{asset.assetId}</td>
+                                                    <td className="assNameCell">{asset.name}</td>
+                                                    <td>{asset.assetId}</td>
                                                     <td>{asset.assignment}</td>
                                                     <td>{asset.location}</td>
                                                     <td>{asset.status}</td>
@@ -488,7 +488,7 @@ export default function Assets() {
                         )}
 
                         {showAssignForm && (
-                            <div className="entryModalBackdrop" onClick={() => setShowAssignForm(false)}>
+                            <div className="entryModalBackdrop entryModalBackdropModal" onClick={() => setShowAssignForm(false)}>
                                 <div className="entryModalCard assetDetailModalTop" role="dialog" aria-modal="true" aria-label="Assign asset" onClick={(e) => e.stopPropagation()}>
                                     <div className="entryModalHead">
                                         <h2>Assign Asset</h2>
@@ -623,7 +623,7 @@ export default function Assets() {
                         )}
 
                         {showTicketForm && (
-                            <div className="entryModalBackdrop" onClick={() => setShowTicketForm(false)}>
+                            <div className="entryModalBackdrop entryModalBackdropModal" onClick={() => setShowTicketForm(false)}>
                                 <div className="entryModalCard assetDetailModalTop" role="dialog" aria-modal="true" aria-label="Create maintenance ticket" onClick={(e) => e.stopPropagation()}>
                                     <div className="entryModalHead">
                                         <h2>Create Ticket</h2>
