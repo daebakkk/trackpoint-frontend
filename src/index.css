@@ -757,13 +757,13 @@ body {
 
 .setCard h2 {
   margin: 0;
-  color: #ffffff;
+  color: var(--text-color);
   font-size: 1rem;
 }
 
 .setCard h3 {
   margin: 0;
-  color: #ffffff;
+  color: var(--text-color);
   font-size: 0.98rem;
 }
 
