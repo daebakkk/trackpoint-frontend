@@ -399,29 +399,31 @@ export default function Maintenance() {
                             <h4>{card.asset}</h4>
                             <p className="mntOpsTask">{card.task}</p>
                             <p className="mntOpsOwner">Owner: {card.owner}</p>
-                            {(() => {
-                              const etaDate = parseEtaDate(card.eta);
-                              if (!etaDate) return null;
-                              const today = new Date();
-                              const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-                              const startOfTomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
-                              const startOfDayAfter = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2);
-                              if (etaDate >= startOfToday && etaDate < startOfTomorrow) {
-                                return <span className="mntOpsDueTag mntOpsDueToday">Due Today</span>;
-                              }
-                              if (etaDate >= startOfTomorrow && etaDate < startOfDayAfter) {
-                                return <span className="mntOpsDueTag mntOpsDueTomorrow">Due Tomorrow</span>;
-                              }
-                              return null;
-                            })()}
-                            <button
-                              type="button"
-                              className="mntOpsCompleteBtn"
-                              disabled={isCompleting}
-                              onClick={() => handleCompleteTicket(card)}
-                            >
-                              Mark Completed
-                            </button>
+                            <div className="mntOpsCardActions">
+                              {(() => {
+                                const etaDate = parseEtaDate(card.eta);
+                                if (!etaDate) return null;
+                                const today = new Date();
+                                const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                                const startOfTomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+                                const startOfDayAfter = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2);
+                                if (etaDate >= startOfToday && etaDate < startOfTomorrow) {
+                                  return <span className="mntOpsDueTag mntOpsDueToday">Due Today</span>;
+                                }
+                                if (etaDate >= startOfTomorrow && etaDate < startOfDayAfter) {
+                                  return <span className="mntOpsDueTag mntOpsDueTomorrow">Due Tomorrow</span>;
+                                }
+                                return null;
+                              })()}
+                              <button
+                                type="button"
+                                className="mntOpsCompleteBtn"
+                                disabled={isCompleting}
+                                onClick={() => handleCompleteTicket(card)}
+                              >
+                                Mark Completed
+                              </button>
+                            </div>
                           </article>
                         ))}
                       </div>

@@ -13,8 +13,8 @@ export default function Settings() {
     maintenanceAlerts: true,
     assignmentUpdates: true,
     weeklySummary: false,
-    defaultOffice: '',
     reportRange: '',
+    currentPassword: '',
     password: '',
     confirmPassword: '',
   });
@@ -46,9 +46,6 @@ export default function Settings() {
           throw new Error('Failed to load settings.');
         }
         const data = await settingsResponse.json();
-        const staffData = staffResponse.ok ? await staffResponse.json() : [];
-        const uniqueOffices = Array.from(new Set(staffData.map((person) => person.office).filter(Boolean)));
-        setOfficeOptions(uniqueOffices);
         setForm((prev) => ({
           ...prev,
           displayName: data.display_name || '',
@@ -56,7 +53,6 @@ export default function Settings() {
           maintenanceAlerts: data.maintenance_alerts ?? true,
           assignmentUpdates: data.assignment_updates ?? true,
           weeklySummary: data.weekly_summary ?? false,
-          defaultOffice: data.default_office || (uniqueOffices[0] || ''),
           reportRange: data.report_range || '',
         }));
       } catch (error) {
@@ -103,8 +99,8 @@ export default function Settings() {
         maintenanceAlerts: data.maintenance_alerts ?? prev.maintenanceAlerts,
         assignmentUpdates: data.assignment_updates ?? prev.assignmentUpdates,
         weeklySummary: data.weekly_summary ?? prev.weeklySummary,
-        defaultOffice: data.default_office || prev.defaultOffice,
         reportRange: data.report_range || prev.reportRange,
+        currentPassword: '',
         password: '',
         confirmPassword: '',
       }));
@@ -137,7 +133,6 @@ export default function Settings() {
   function handleDefaultsSave() {
     handleSave(
       {
-        default_office: form.defaultOffice,
         report_range: form.reportRange,
       },
       'Defaults saved.',
@@ -145,11 +140,15 @@ export default function Settings() {
   }
 
   function handlePasswordSave() {
+    if (!form.currentPassword) {
+      setSaveError('Enter your current password.');
+      return;
+    }
     if (!form.password || form.password !== form.confirmPassword) {
       setSaveError('Passwords do not match.');
       return;
     }
-    handleSave({ password: form.password }, 'Password updated.');
+    handleSave({ current_password: form.currentPassword, password: form.password }, 'Password updated.');
   }
 
   return (
@@ -207,6 +206,17 @@ export default function Settings() {
 
                 <article className="setCard">
                   <h3>Security</h3>
+                  <div className="setField">
+                    <label>Current password</label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={form.currentPassword}
+                      onChange={handleChange}
+                      placeholder="Current password"
+                      disabled={isLoading}
+                    />
+                  </div>
                   <div className="setField">
                     <label>Change password</label>
                     <input
@@ -292,24 +302,10 @@ export default function Settings() {
 
                 <article className="setCard">
                   <h3>Defaults</h3>
-                <div className="setField">
-                  <label>Default office</label>
-                  <select
-                    name="defaultOffice"
-                    value={form.defaultOffice}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                  >
-                    {officeOptions.length === 0 && <option>HQ</option>}
-                    {officeOptions.map((office) => (
-                      <option key={office}>{office}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="setField">
-                  <label>Report range</label>
-                  <select
-                    name="reportRange"
+                  <div className="setField">
+                    <label>Report range</label>
+                    <select
+                      name="reportRange"
                     value={form.reportRange}
                     onChange={handleChange}
                     disabled={isLoading}
