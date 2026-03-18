@@ -41,8 +41,8 @@ export default function Profile() {
           email: meData.email || settingsData.email || '',
           firstName: meData.first_name || '',
           lastName: meData.last_name || '',
-          displayName: settingsData.display_name || `${meData.first_name || ''} ${meData.last_name || ''}`.trim(),
-          defaultOffice: settingsData.default_office || 'Not set',
+          displayName: settingsData.display_name || `${meData.first_name || ''} ${meData.last_name || ''}`.trim() || meData.username || meData.email || '',
+          defaultOffice: 'Not set',
           reportRange: settingsData.report_range || 'Not set',
         });
       } catch (err) {

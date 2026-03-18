@@ -111,12 +111,22 @@ export default function Dashboard() {
       const token = localStorage.getItem('access_token');
       if (!token) return;
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!response.ok) return;
-        const data = await response.json();
-        setFirstName((data.first_name || '').trim());
+        const [meResponse, settingsResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/api/auth/me/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          fetch(`${API_BASE_URL}/api/settings/me/`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
+        const meData = meResponse.ok ? await meResponse.json() : {};
+        const settingsData = settingsResponse.ok ? await settingsResponse.json() : {};
+        const displayName = (settingsData.display_name || '').trim();
+        const first = (meData.first_name || '').trim();
+        const fallback = (meData.username || meData.email || '').trim();
+        const nameSource = displayName || first || fallback;
+        const greetingName = nameSource ? nameSource.split(' ')[0] : '';
+        setFirstName(greetingName);
       } catch {
         // ignore user fetch errors
       }

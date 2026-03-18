@@ -5,6 +5,8 @@
   --secondary-color: #4B5563;
   --highlights-color: #2563EB;
   --bg-color: #e6f1fc;
+  --text-color: #0f172a;
+  --text-muted: #475569;
   --dash-bg-deep: #0b1624;
   --dash-surface: #102033;
   --dash-stroke: #1f3956;
@@ -21,6 +23,8 @@
   --secondary-color: #94a3b8;
   --highlights-color: #38bdf8;
   --bg-color: #0b1220;
+  --text-color: #e2e8f0;
+  --text-muted: #94a3b8;
   --dash-bg-deep: #0b1220;
   --dash-surface: #111827;
   --dash-stroke: #1f2a44;
@@ -484,14 +488,14 @@ body {
 
 .dashGreeting h2 {
   margin: 0 0 0.2rem;
-  color: var(--dash-text-main);
+  color: var(--text-color);
   font-size: 1.2rem;
   font-weight: 800;
 }
 
 .dashGreeting p {
   margin: 0;
-  color: var(--dash-text-muted);
+  color: var(--text-muted);
   font-size: 0.86rem;
 }
 

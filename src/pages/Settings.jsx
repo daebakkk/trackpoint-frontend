@@ -10,6 +10,7 @@ export default function Settings() {
   const [form, setForm] = useState({
     displayName: '',
     email: '',
+    username: '',
     maintenanceAlerts: true,
     assignmentUpdates: true,
     weeklySummary: false,
@@ -44,10 +45,11 @@ export default function Settings() {
           ...prev,
           displayName: data.display_name || '',
           email: data.email || '',
+          username: data.username || '',
           maintenanceAlerts: data.maintenance_alerts ?? true,
           assignmentUpdates: data.assignment_updates ?? true,
           weeklySummary: data.weekly_summary ?? false,
-          darkMode: data.dark_mode ?? true,
+          darkMode: data.dark_mode ?? false,
         }));
         const themeValue = data.dark_mode ? 'dark' : 'light';
         document.documentElement.dataset.theme = themeValue;
@@ -69,6 +71,12 @@ export default function Settings() {
       [name]: type === 'checkbox' ? checked : value,
     }));
   }
+
+  useEffect(() => {
+    const themeValue = form.darkMode ? 'dark' : 'light';
+    document.documentElement.dataset.theme = themeValue;
+    localStorage.setItem('theme', themeValue);
+  }, [form.darkMode]);
 
   async function handleSave(payload, successMessage) {
     setIsSaving(true);
@@ -93,6 +101,7 @@ export default function Settings() {
         ...prev,
         displayName: data.display_name || prev.displayName,
         email: data.email || prev.email,
+        username: data.username || prev.username,
         maintenanceAlerts: data.maintenance_alerts ?? prev.maintenanceAlerts,
         assignmentUpdates: data.assignment_updates ?? prev.assignmentUpdates,
         weeklySummary: data.weekly_summary ?? prev.weeklySummary,
@@ -116,7 +125,7 @@ export default function Settings() {
 
   function handleProfileSave() {
     handleSave(
-      { display_name: form.displayName, email: form.email },
+      { display_name: form.displayName, email: form.email, username: form.username },
       'Profile updated.',
     );
   }
@@ -173,8 +182,8 @@ export default function Settings() {
               <div className="setGrid">
                 <article className="setCard">
                   <h3>Profile</h3>
-                <div className="setField">
-                  <label>Display name</label>
+                  <div className="setField">
+                    <label>Display name</label>
                   <input
                     type="text"
                     name="displayName"
@@ -192,10 +201,20 @@ export default function Settings() {
                     onChange={handleChange}
                     disabled={isLoading}
                   />
-                </div>
-                <button type="button" className="pageActionBtn" onClick={handleProfileSave} disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Update Profile'}
-                </button>
+                  </div>
+                  <div className="setField">
+                    <label>Username</label>
+                    <input
+                      type="text"
+                      name="username"
+                      value={form.username}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button type="button" className="pageActionBtn" onClick={handleProfileSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Update Profile'}
+                  </button>
                 </article>
 
                 <article className="setCard">
