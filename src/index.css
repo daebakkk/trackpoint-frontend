@@ -1549,10 +1549,18 @@ body {
   background-color: rgba(37, 99, 235, 0.28);
 }
 
+.assClickableRow:hover .assIdCell {
+  text-decoration: underline;
+}
+
 .assetDetailCard {
   width: min(720px, 96vw);
   max-height: 85vh;
   overflow: auto;
+}
+
+.assetDetailModalTop {
+  z-index: 1350;
 }
 
 .assetDetailBody {

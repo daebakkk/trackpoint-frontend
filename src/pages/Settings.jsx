@@ -249,12 +249,12 @@ export default function Settings() {
               </div>
               <div className="setGrid">
                 <article className="setCard">
-                  <h3>Notifications</h3>
-                <div className="setToggle">
-                  <div>
-                    <p>Maintenance alerts</p>
-                    <span>Critical and high priority tickets</span>
-                  </div>
+                  <h3>Preferences</h3>
+                  <div className="setToggle">
+                    <div>
+                      <p>Maintenance alerts</p>
+                      <span>Critical and high priority tickets</span>
+                    </div>
                   <input
                     type="checkbox"
                     name="maintenanceAlerts"
@@ -276,11 +276,11 @@ export default function Settings() {
                     disabled={isLoading}
                   />
                 </div>
-                <div className="setToggle">
-                  <div>
-                    <p>Weekly summary</p>
-                    <span>Performance snapshot every Monday</span>
-                  </div>
+                  <div className="setToggle">
+                    <div>
+                      <p>Weekly summary</p>
+                      <span>Performance snapshot every Monday</span>
+                    </div>
                   <input
                     type="checkbox"
                     name="weeklySummary"
@@ -289,13 +289,6 @@ export default function Settings() {
                     disabled={isLoading}
                   />
                 </div>
-                <button type="button" className="pageActionBtn" onClick={handleNotificationsSave} disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Save Preferences'}
-                </button>
-                </article>
-
-                <article className="setCard">
-                  <h3>Theme</h3>
                   <div className="setToggle">
                     <div>
                       <p>Dark mode</p>
@@ -309,6 +302,9 @@ export default function Settings() {
                       disabled={isLoading}
                     />
                   </div>
+                  <button type="button" className="pageActionBtn" onClick={handleNotificationsSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Save Preferences'}
+                  </button>
                 </article>
               </div>
             </section>

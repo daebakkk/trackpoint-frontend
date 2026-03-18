@@ -1,5 +1,5 @@
 import Navbar from '../components/Navbar';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PageSidebar from '../components/PageSidebar';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
@@ -69,7 +69,6 @@ export default function Assets() {
         owner: '',
         eta: '',
     });
-    const closeTimerRef = useRef(null);
 
     useEffect(() => {
         async function loadAssets() {
@@ -145,21 +144,6 @@ export default function Assets() {
         }
     }
 
-    function scheduleCloseDetails() {
-        if (closeTimerRef.current) {
-            clearTimeout(closeTimerRef.current);
-        }
-        closeTimerRef.current = setTimeout(() => {
-            setShowDetails(false);
-        }, 120);
-    }
-
-    function cancelCloseDetails() {
-        if (closeTimerRef.current) {
-            clearTimeout(closeTimerRef.current);
-            closeTimerRef.current = null;
-        }
-    }
 
     async function handleSubmit(event) {
         event.preventDefault();
@@ -419,14 +403,10 @@ export default function Assets() {
                                                 <tr
                                                     className="tabRow assClickableRow"
                                                     key={asset.id}
-                                                    onMouseEnter={() => {
-                                                        cancelCloseDetails();
-                                                        openAssetDetails(asset);
-                                                    }}
-                                                    onMouseLeave={scheduleCloseDetails}
+                                                    onClick={() => openAssetDetails(asset)}
                                                 >
                                                     <td>{asset.name}</td>
-                                                    <td>{asset.assetId}</td>
+                                                    <td className="assIdCell">{asset.assetId}</td>
                                                     <td>{asset.assignment}</td>
                                                     <td>{asset.location}</td>
                                                     <td>{asset.status}</td>
@@ -509,7 +489,7 @@ export default function Assets() {
 
                         {showAssignForm && (
                             <div className="entryModalBackdrop" onClick={() => setShowAssignForm(false)}>
-                                <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Assign asset" onClick={(e) => e.stopPropagation()}>
+                                <div className="entryModalCard assetDetailModalTop" role="dialog" aria-modal="true" aria-label="Assign asset" onClick={(e) => e.stopPropagation()}>
                                     <div className="entryModalHead">
                                         <h2>Assign Asset</h2>
                                         <button type="button" className="entryCloseBtn" onClick={() => setShowAssignForm(false)} aria-label="Close assign asset form">x</button>
@@ -567,8 +547,6 @@ export default function Assets() {
                                     aria-modal="true"
                                     aria-label="Asset details"
                                     onClick={(e) => e.stopPropagation()}
-                                    onMouseEnter={cancelCloseDetails}
-                                    onMouseLeave={scheduleCloseDetails}
                                 >
                                     <div className="entryModalHead">
                                         <h2>Asset Details</h2>
@@ -646,7 +624,7 @@ export default function Assets() {
 
                         {showTicketForm && (
                             <div className="entryModalBackdrop" onClick={() => setShowTicketForm(false)}>
-                                <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Create maintenance ticket" onClick={(e) => e.stopPropagation()}>
+                                <div className="entryModalCard assetDetailModalTop" role="dialog" aria-modal="true" aria-label="Create maintenance ticket" onClick={(e) => e.stopPropagation()}>
                                     <div className="entryModalHead">
                                         <h2>Create Ticket</h2>
                                         <button type="button" className="entryCloseBtn" onClick={() => setShowTicketForm(false)} aria-label="Close create ticket form">x</button>
