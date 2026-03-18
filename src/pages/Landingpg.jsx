@@ -68,29 +68,70 @@ export default function Landingpg() {
 
     return (
         <div className="landingShell">
+            <div className="landingBackdrop" aria-hidden="true">
+                <span className="landingGlow landingGlowOne" />
+                <span className="landingGlow landingGlowTwo" />
+                <span className="landingGridPattern" />
+                <span className="landingHalo landingHaloTop" />
+                <span className="landingHalo landingHaloBottom" />
+            </div>
             <main className="landingPage">
                 <section className="landingHero">
-                    <p className="landingEyebrow">Asset Operations Platform</p>
-                    <h1 className="landingHeading">TrackPoint powers modern IT teams with speed and control.</h1>
-                    <p className="landingSubtext">
-                        A single workspace for monitoring assets, resolving incidents, and keeping operations compliant.
-                    </p>
-                    <div className="landingActions">
-                        <Link className="lpButton lpButtonPrimary" to="/signup">Get Started</Link>
-                        <button type="button" className="lpButton lpButtonGhost" onClick={() => setShowLogin(true)}>Log In</button>
+                    <div className="landingHeroContent">
+                        <p className="landingEyebrow">Asset Operations Platform</p>
+                        <h1 className="landingHeading">TrackPoint powers modern IT teams with speed and control.</h1>
+                        <p className="landingSubtext">
+                            A single workspace for monitoring assets, resolving incidents, and keeping operations compliant.
+                        </p>
+                        <div className="landingActions">
+                            <Link className="lpButton lpButtonPrimary" to="/signup">Get Started</Link>
+                            <button type="button" className="lpButton lpButtonGhost" onClick={() => setShowLogin(true)}>Log In</button>
+                        </div>
+                        <div className="landingStats">
+                            <div>
+                                <h3>99.4%</h3>
+                                <p>Asset Uptime</p>
+                            </div>
+                            <div>
+                                <h3>2h 14m</h3>
+                                <p>Avg Resolution</p>
+                            </div>
+                            <div>
+                                <h3>96/100</h3>
+                                <p>Compliance Score</p>
+                            </div>
+                        </div>
                     </div>
-                    <div className="landingStats">
-                        <div>
-                            <h3>99.4%</h3>
-                            <p>Asset Uptime</p>
-                        </div>
-                        <div>
-                            <h3>2h 14m</h3>
-                            <p>Avg Resolution</p>
-                        </div>
-                        <div>
-                            <h3>96/100</h3>
-                            <p>Compliance Score</p>
+                    <div className="landingHeroVisual">
+                        <div className="landingHeroRing" />
+                        <div className="landingDeviceStack">
+                            <div className="landingDeviceCard landingDeviceMain">
+                                <div className="landingDeviceTop">
+                                    <span>TrackPoint Ops</span>
+                                    <span>Live</span>
+                                </div>
+                                <div className="landingDeviceStat">
+                                    <strong>124</strong>
+                                    <p>Assets in service</p>
+                                </div>
+                                <div className="landingDeviceStat">
+                                    <strong>16</strong>
+                                    <p>Open tickets</p>
+                                </div>
+                                <div className="landingDeviceFooter">
+                                    <span>Last sync</span>
+                                    <strong>2m ago</strong>
+                                </div>
+                            </div>
+                            <div className="landingDeviceCard landingDeviceGhost">
+                                <p>Assignments</p>
+                                <strong>92 active</strong>
+                                <span>Across 6 offices</span>
+                            </div>
+                            <div className="landingDeviceCard landingDeviceMini">
+                                <p>Repair Queue</p>
+                                <strong>5 critical</strong>
+                            </div>
                         </div>
                     </div>
                 </section>
