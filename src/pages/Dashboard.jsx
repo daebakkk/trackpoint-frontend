@@ -6,7 +6,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000
 
 function formatTimeAgo(value) {
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return '—';
+  if (Number.isNaN(parsed.getTime())) return '-';
   const diffMs = Date.now() - parsed.getTime();
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 1) return 'just now';
@@ -202,6 +202,7 @@ export default function Dashboard() {
   const linePath = incidentPoints.length ? `M${incidentPoints.join(' L')}` : '';
 
   const kpis = useMemo(() => {
+    const openTickets = tickets.filter((ticket) => ticket.status !== 'Completed');
     const totalAssets = assets.length;
     const healthyAssets = assets.filter((asset) => {
       const status = (asset.status || '').toLowerCase();
@@ -216,7 +217,7 @@ export default function Dashboard() {
 
     return [
       { label: 'Asset Uptime', value: uptime, trend: 'Live from asset status' },
-      { label: 'Open Tickets', value: `${tickets.length}`, trend: 'Active maintenance tickets' },
+      { label: 'Open Tickets', value: `${openTickets.length}`, trend: 'Active maintenance tickets' },
       { label: 'In Repair', value: `${inRepairAssets}`, trend: 'Currently flagged' },
       { label: 'Unassigned Assets', value: `${unassignedAssets}`, trend: 'Awaiting assignment' },
     ];

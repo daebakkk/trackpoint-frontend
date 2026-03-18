@@ -61,7 +61,7 @@ const actionMap = {
 
 function formatTimeAgo(value) {
   const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) return 'â€”';
+  if (Number.isNaN(parsed.getTime())) return '-';
   const diffMs = Date.now() - parsed.getTime();
   const diffMin = Math.floor(diffMs / 60000);
   if (diffMin < 1) return 'just now';
@@ -118,7 +118,7 @@ export default function PageSidebar({ context = 'Dashboard' }) {
     const assetsCount = assets.length;
     const staffCount = staff.length;
     const assignmentsCount = assignments.length;
-    const ticketsCount = tickets.length;
+    const openTicketsCount = tickets.filter((ticket) => ticket.status !== 'Completed').length;
     const openAssignments = assignments.filter((item) => item.status !== 'Returned').length;
     const returnedAssignments = assignments.filter((item) => item.status === 'Returned').length;
     const unassignedAssets = assets.filter((asset) => !asset.assigned_to).length;
@@ -140,7 +140,7 @@ export default function PageSidebar({ context = 'Dashboard' }) {
     const contextMap = {
       Dashboard: {
         status: 'Live Monitoring',
-        metric: `${ticketsCount} open tickets`,
+        metric: `${openTicketsCount} open tickets`,
         notes: [
           `${criticalAssets} assets flagged`,
           `${unassignedAssets} unassigned assets`,
@@ -176,7 +176,7 @@ export default function PageSidebar({ context = 'Dashboard' }) {
       },
       Maintenance: {
         status: 'Ops Queue',
-        metric: `${ticketsCount} active tasks`,
+        metric: `${openTicketsCount} active tasks`,
         notes: [
           `${criticalTickets} critical tickets`,
           `${criticalAssets} assets flagged`,
@@ -194,7 +194,7 @@ export default function PageSidebar({ context = 'Dashboard' }) {
       },
       Reports: {
         status: 'Reporting Window',
-        metric: `${assetsCount} assets, ${ticketsCount} tickets`,
+        metric: `${assetsCount} assets, ${openTicketsCount} active tickets`,
         notes: [
           `${criticalAssets} assets flagged`,
           `${openAssignments} active assignments`,
@@ -207,7 +207,7 @@ export default function PageSidebar({ context = 'Dashboard' }) {
         notes: [
           `${assetsCount} assets tracked`,
           `${openAssignments} active assignments`,
-          `${ticketsCount} open tickets`,
+          `${openTicketsCount} open tickets`,
         ],
       },
     };
@@ -231,14 +231,19 @@ export default function PageSidebar({ context = 'Dashboard' }) {
       .sort((a, b) => new Date(b.time) - new Date(a.time))
       .slice(0, 5)
       .map((entry) => ({ time: formatTimeAgo(entry.time), text: entry.text }));
-    return combined.length ? combined : [{ time: 'â€”', text: 'No recent activity' }];
+    return combined.length ? combined : [{ time: '-', text: 'No recent activity' }];
   }, [tickets, assignments]);
+
+  const openTicketsCount = useMemo(
+    () => tickets.filter((ticket) => ticket.status !== 'Completed').length,
+    [tickets],
+  );
 
   const systemHealth = useMemo(() => ([
     { label: 'Assets', value: `${assets.length}` },
     { label: 'Staff', value: `${staff.length}` },
-    { label: 'Queue', value: `${tickets.length} open` },
-  ]), [assets.length, staff.length, tickets.length]);
+    { label: 'Queue', value: `${openTicketsCount} open` },
+  ]), [assets.length, staff.length, openTicketsCount]);
 
   return (
     <aside className="appSidebar">

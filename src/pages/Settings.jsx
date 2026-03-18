@@ -86,7 +86,9 @@ export default function Settings() {
       });
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
-        throw new Error(data.detail || 'Failed to save settings.');
+        const firstFieldError = Object.values(data || {}).find((value) => Array.isArray(value) && value.length);
+        const errorMessage = firstFieldError ? firstFieldError[0] : data.detail || 'Failed to save settings.';
+        throw new Error(errorMessage);
       }
       const data = await response.json();
       setForm((prev) => ({
