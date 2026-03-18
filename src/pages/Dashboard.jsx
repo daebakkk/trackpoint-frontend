@@ -203,14 +203,14 @@ export default function Dashboard() {
 
   const kpis = useMemo(() => {
     const openTickets = tickets.filter((ticket) => ticket.status !== 'Completed');
+    const inRepairTickets = tickets.filter((ticket) => {
+      const status = (ticket.status || '').toLowerCase();
+      return status.includes('repair') || status.includes('in progress') || status.includes('in-progress');
+    });
     const totalAssets = assets.length;
     const healthyAssets = assets.filter((asset) => {
       const status = (asset.status || '').toLowerCase();
       return status.includes('good') || status.includes('working');
-    }).length;
-    const inRepairAssets = assets.filter((asset) => {
-      const status = (asset.status || '').toLowerCase();
-      return status.includes('repair') || status.includes('critical');
     }).length;
     const unassignedAssets = assets.filter((asset) => !asset.assigned_to).length;
     const uptime = totalAssets ? `${Math.round((healthyAssets / totalAssets) * 1000) / 10}%` : '0%';
@@ -218,7 +218,7 @@ export default function Dashboard() {
     return [
       { label: 'Asset Uptime', value: uptime, trend: 'Live from asset status' },
       { label: 'Open Tickets', value: `${openTickets.length}`, trend: 'Active maintenance tickets' },
-      { label: 'In Repair', value: `${inRepairAssets}`, trend: 'Currently flagged' },
+      { label: 'In Repair', value: `${inRepairTickets.length}`, trend: 'In-progress tickets' },
       { label: 'Unassigned Assets', value: `${unassignedAssets}`, trend: 'Awaiting assignment' },
     ];
   }, [assets, tickets]);
