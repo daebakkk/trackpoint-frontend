@@ -831,6 +831,107 @@ body {
 .setProfileLine strong {
   color: #e2e8f0;
 }
+
+.profileHero {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border-radius: 0.95rem;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(14, 116, 144, 0.2));
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  margin-bottom: 1rem;
+}
+
+.profileHero h2 {
+  margin: 0 0 0.3rem;
+  color: var(--text-color);
+  font-size: 1.25rem;
+}
+
+.profileHero p {
+  margin: 0 0 0.6rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.profileAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--text-color);
+  display: grid;
+  place-items: center;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.profileBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.profileBadges span {
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(15, 23, 42, 0.2);
+  color: var(--text-color);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+}
+
+.profileCard {
+  background: var(--primary-color);
+  border-radius: 0.85rem;
+  padding: 1rem;
+  border: 1px solid rgba(191, 219, 254, 0.2);
+  box-shadow: 0 10px 24px rgba(2, 6, 23, 0.18);
+  display: grid;
+  gap: 0.7rem;
+}
+
+.profileCard h3 {
+  margin: 0;
+  color: var(--text-color);
+  font-size: 0.95rem;
+}
+
+.profileRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.4rem 0.5rem;
+  border-radius: 0.5rem;
+  background: rgba(2, 6, 23, 0.18);
+  color: var(--text-color);
+  font-size: 0.82rem;
+}
+
+.profileRow span {
+  color: var(--text-muted);
+}
+
+.profileHint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.profileLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
 .suCard {
   background-color: var(--primary-color);
   padding: 2rem;

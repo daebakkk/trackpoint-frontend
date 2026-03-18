@@ -70,26 +70,61 @@ export default function Profile() {
             <PageSidebar context="Settings" />
           </div>
           <div className="appPageMain">
-            <section className="setSection">
-              <div className="setSectionHead">
-                <div>
-                  <h2>Account Overview</h2>
-                  <p>Basic identity and workspace defaults.</p>
+            <section className="profileHero">
+              <div className="profileAvatar">
+                {profile.displayName ? profile.displayName.charAt(0).toUpperCase() : 'U'}
+              </div>
+              <div>
+                <h2>{profile.displayName || 'Your Profile'}</h2>
+                <p>Account identity, access defaults, and preferences.</p>
+                <div className="profileBadges">
+                  <span>{profile.username || 'Username pending'}</span>
+                  <span>{profile.email || 'Email pending'}</span>
                 </div>
               </div>
-              <div className="setGrid">
-                <article className="setCard">
-                  <h3>Identity</h3>
-                  <p className="setProfileLine"><strong>Display name:</strong> {profile.displayName || 'Not set'}</p>
-                  <p className="setProfileLine"><strong>Username:</strong> {profile.username || 'Not set'}</p>
-                  <p className="setProfileLine"><strong>Email:</strong> {profile.email || 'Not set'}</p>
-                </article>
-                <article className="setCard">
-                  <h3>Defaults</h3>
-                  <p className="setProfileLine"><strong>Default office:</strong> {profile.defaultOffice}</p>
-                  <p className="setProfileLine"><strong>Report range:</strong> {profile.reportRange}</p>
-                </article>
-              </div>
+            </section>
+
+            <section className="profileGrid">
+              <article className="profileCard">
+                <h3>Identity</h3>
+                <div className="profileRow">
+                  <span>Display name</span>
+                  <strong>{profile.displayName || 'Not set'}</strong>
+                </div>
+                <div className="profileRow">
+                  <span>Username</span>
+                  <strong>{profile.username || 'Not set'}</strong>
+                </div>
+                <div className="profileRow">
+                  <span>Email</span>
+                  <strong>{profile.email || 'Not set'}</strong>
+                </div>
+              </article>
+
+              <article className="profileCard">
+                <h3>Defaults</h3>
+                <div className="profileRow">
+                  <span>Default office</span>
+                  <strong>{profile.defaultOffice}</strong>
+                </div>
+                <div className="profileRow">
+                  <span>Report range</span>
+                  <strong>{profile.reportRange}</strong>
+                </div>
+              </article>
+
+              <article className="profileCard">
+                <h3>Quick Links</h3>
+                <p className="profileHint">Jump back into your workspace.</p>
+                <div className="profileLinks">
+                  <button type="button" className="pageActionBtn" onClick={() => window.location.assign('/dashboard')}>
+                    Dashboard
+                  </button>
+                  <button type="button" className="pageActionBtn" onClick={() => window.location.assign('/settings')}>
+                    Settings
+                  </button>
+                </div>
+              </article>
             </section>
 
             {isLoading && <p className="setMessage">Loading profile...</p>}
