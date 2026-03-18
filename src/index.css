@@ -342,7 +342,7 @@ body {
   margin-top: 1rem;
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.82);
+  background: rgba(15, 23, 42, 0.82);
   padding: 1.2rem;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
 }
@@ -358,7 +358,7 @@ body {
 
 .landingSectionHead h2 {
   margin: 0.35rem 0 0;
-  color: var(--primary-color);
+  color: #f8fafc;
   font-size: clamp(1.15rem, 2vw, 1.6rem);
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
 }
@@ -373,7 +373,7 @@ body {
 .landingWorkflowCard {
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 14px;
-  background: #ffffff;
+  background: rgba(15, 23, 42, 0.7);
   padding: 0.95rem;
 }
 
@@ -384,13 +384,13 @@ body {
 
 .landingWorkflowCard h3 {
   margin: 0.35rem 0 0.3rem;
-  color: var(--primary-color);
+  color: #f8fafc;
   font-size: 0.98rem;
 }
 
 .landingWorkflowCard p {
   margin: 0;
-  color: var(--secondary-color);
+  color: #cbd5f5;
   font-size: 0.86rem;
 }
 
@@ -475,19 +475,19 @@ body {
 .landingFaqCard {
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 14px;
-  background: #ffffff;
+  background: rgba(15, 23, 42, 0.7);
   padding: 0.95rem;
 }
 
 .landingFaqCard h3 {
   margin: 0 0 0.3rem;
-  color: var(--primary-color);
+  color: #f8fafc;
   font-size: 0.92rem;
 }
 
 .landingFaqCard p {
   margin: 0;
-  color: var(--secondary-color);
+  color: #cbd5f5;
   font-size: 0.85rem;
 }
 
