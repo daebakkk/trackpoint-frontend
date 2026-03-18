@@ -41,8 +41,10 @@ export default function Assets() {
     const [showForm, setShowForm] = useState(false);
     const [showAssignForm, setShowAssignForm] = useState(false);
     const [showDetails, setShowDetails] = useState(false);
+    const [showTicketForm, setShowTicketForm] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isAssigning, setIsAssigning] = useState(false);
+    const [isCreatingTicket, setIsCreatingTicket] = useState(false);
     const [isLoadingDetails, setIsLoadingDetails] = useState(false);
     const [form, setForm] = useState({
         assetId: '',
@@ -59,6 +61,14 @@ export default function Assets() {
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [assetAssignments, setAssetAssignments] = useState([]);
     const [assetTickets, setAssetTickets] = useState([]);
+    const [ticketForm, setTicketForm] = useState({
+        lane: 'Planned',
+        ticket: '',
+        assetId: '',
+        task: '',
+        owner: '',
+        eta: '',
+    });
     const closeTimerRef = useRef(null);
 
     useEffect(() => {
@@ -100,11 +110,20 @@ export default function Assets() {
         setAssignForm((prev) => ({ ...prev, [name]: value }));
     }
 
+    function handleTicketChange(event) {
+        const { name, value } = event.target;
+        setTicketForm((prev) => ({ ...prev, [name]: value }));
+    }
+
     async function openAssetDetails(asset) {
         if (selectedAsset && selectedAsset.id === asset.id && showDetails) {
             return;
         }
         setSelectedAsset(asset);
+        setTicketForm((prev) => ({
+            ...prev,
+            assetId: asset.assetId || '',
+        }));
         setShowDetails(true);
         setIsLoadingDetails(true);
         setAssetAssignments([]);
@@ -251,6 +270,67 @@ export default function Assets() {
             setFetchError(error.message || 'Unable to assign asset.');
         } finally {
             setIsAssigning(false);
+        }
+    }
+
+    async function handleTicketSubmit(event) {
+        event.preventDefault();
+        const laneValue = ticketForm.lane || 'Planned';
+        const assetIdValue = ticketForm.assetId.trim();
+        const taskValue = ticketForm.task.trim();
+        const ownerValue = ticketForm.owner.trim();
+        const etaValue = ticketForm.eta.trim();
+
+        if (!assetIdValue || !taskValue || !ownerValue || !etaValue) {
+            return;
+        }
+
+        setIsCreatingTicket(true);
+        setFetchError('');
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/maintenance-tickets/`);
+            if (!response.ok) {
+                throw new Error(await getErrorMessage(response, 'Failed to load tickets for ID generation'));
+            }
+            const currentTickets = await response.json();
+            const prefix = laneValue === 'Preventive' ? 'PM-' : 'M-';
+            const usedNumbers = currentTickets
+                .map((item) => item.ticket_id)
+                .filter((ticket) => ticket.startsWith(prefix))
+                .map((ticket) => Number(ticket.replace(prefix, '')))
+                .filter((num) => Number.isFinite(num));
+            const maxNumber = usedNumbers.length ? Math.max(...usedNumbers) : laneValue === 'Preventive' ? 3100 : 2200;
+            const payload = {
+                ticket_id: ticketForm.ticket.trim() || `${prefix}${maxNumber + 1}`,
+                lane: laneValue,
+                asset_id: assetIdValue,
+                task: taskValue,
+                owner: ownerValue,
+                eta: etaValue,
+                status: 'Open',
+            };
+
+            const createResponse = await fetch(`${API_BASE_URL}/api/maintenance-tickets/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!createResponse.ok) {
+                throw new Error(await getErrorMessage(createResponse, 'Failed to create ticket'));
+            }
+            setTicketForm({
+                lane: 'Planned',
+                ticket: '',
+                assetId: selectedAsset ? selectedAsset.assetId : '',
+                task: '',
+                owner: '',
+                eta: '',
+            });
+            setShowTicketForm(false);
+        } catch (error) {
+            setFetchError(error.message || 'Unable to create ticket.');
+        } finally {
+            setIsCreatingTicket(false);
         }
     }
 
@@ -550,11 +630,74 @@ export default function Assets() {
 
                                         <section className="assetDetailSection">
                                             <h4>Actions</h4>
-                                            <button type="button" className="pageActionBtn" onClick={() => setShowAssignForm(true)}>
-                                                Assign Asset
-                                            </button>
+                                            <div className="assetDetailActions">
+                                                <button type="button" className="pageActionBtn" onClick={() => setShowAssignForm(true)}>
+                                                    Assign Asset
+                                                </button>
+                                                <button type="button" className="pageActionBtn" onClick={() => setShowTicketForm(true)}>
+                                                    Create Ticket
+                                                </button>
+                                            </div>
                                         </section>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {showTicketForm && (
+                            <div className="entryModalBackdrop" onClick={() => setShowTicketForm(false)}>
+                                <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Create maintenance ticket" onClick={(e) => e.stopPropagation()}>
+                                    <div className="entryModalHead">
+                                        <h2>Create Ticket</h2>
+                                        <button type="button" className="entryCloseBtn" onClick={() => setShowTicketForm(false)} aria-label="Close create ticket form">x</button>
+                                    </div>
+                                    <form className="entryForm" onSubmit={handleTicketSubmit}>
+                                        <label>
+                                            Lane
+                                            <select name="lane" value={ticketForm.lane} onChange={handleTicketChange}>
+                                                <option>Critical</option>
+                                                <option>Planned</option>
+                                                <option>Preventive</option>
+                                            </select>
+                                        </label>
+                                        <label>
+                                            Ticket ID (optional)
+                                            <input name="ticket" value={ticketForm.ticket} onChange={handleTicketChange} placeholder="Leave empty to auto-generate" />
+                                        </label>
+                                        <label>
+                                            Asset ID
+                                            <input
+                                                name="assetId"
+                                                list="asset-ticket-options"
+                                                value={ticketForm.assetId}
+                                                onChange={handleTicketChange}
+                                                placeholder="Select or type an asset ID"
+                                                required
+                                            />
+                                            <datalist id="asset-ticket-options">
+                                                {assets.map((asset) => (
+                                                    <option key={asset.id} value={asset.assetId}>
+                                                        {asset.name} ({asset.assetId})
+                                                    </option>
+                                                ))}
+                                            </datalist>
+                                        </label>
+                                        <label>
+                                            Task
+                                            <input name="task" value={ticketForm.task} onChange={handleTicketChange} placeholder="e.g. Battery replacement" required />
+                                        </label>
+                                        <label>
+                                            Owner
+                                            <input name="owner" value={ticketForm.owner} onChange={handleTicketChange} placeholder="e.g. Support Team" required />
+                                        </label>
+                                        <label>
+                                            ETA
+                                            <input name="eta" type="datetime-local" value={ticketForm.eta} onChange={handleTicketChange} required />
+                                        </label>
+                                        <button type="submit" className="entrySubmitBtn" disabled={isCreatingTicket}>
+                                            {isCreatingTicket ? 'Creating...' : 'Create Ticket'}
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         )}

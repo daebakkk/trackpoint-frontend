@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useEffect } from 'react';
 import Dashboard from './pages/Dashboard'
 import Landingpg from './pages/Landingpg';
 import Signup from './pages/Signup';
@@ -21,6 +22,12 @@ function RequireAuth({ children }) {
 }
 
 function App() {
+  useEffect(() => {
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme) {
+      document.documentElement.dataset.theme = storedTheme;
+    }
+  }, []);
   return (
   <>
     <Router>

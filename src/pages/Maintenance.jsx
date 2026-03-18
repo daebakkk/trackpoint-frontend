@@ -5,18 +5,9 @@ import PageSidebar from '../components/PageSidebar';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 const initialMaintenanceLanes = {
-  Critical: [
-    { id: null, ticket: 'M-2201', asset: 'DELL 2024 (0182)', task: 'Motherboard diagnostics', owner: 'Casey Luo', eta: 'Today 16:30' },
-    { id: null, ticket: 'M-2204', asset: 'Cisco Catalyst 9200 (0821)', task: 'Port stability testing', owner: 'Network Team', eta: 'Today 18:00' },
-  ],
-  Planned: [
-    { id: null, ticket: 'M-2202', asset: 'HP EliteBook 850 (0427)', task: 'Battery replacement', owner: 'Noah Patel', eta: 'Tomorrow 11:00' },
-    { id: null, ticket: 'M-2205', asset: 'MacBook Pro (0243)', task: 'Display assembly', owner: 'David Kim', eta: 'Mar 04 13:00' },
-  ],
-  Preventive: [
-    { id: null, ticket: 'PM-3110', asset: 'Server Room B UPS', task: 'Quarterly battery check', owner: 'Ifeoma Chukwu', eta: 'Mar 05 10:00' },
-    { id: null, ticket: 'PM-3111', asset: 'Floor 2 Rack', task: 'Cable integrity audit', owner: 'Network Team', eta: 'Mar 06 09:00' },
-  ],
+  Critical: [],
+  Planned: [],
+  Preventive: [],
 };
 
 const machineHealth = [
@@ -25,12 +16,7 @@ const machineHealth = [
   { system: 'Print Services', uptime: '97.9%', trend: '+0.1%' },
 ];
 
-const initialMaintenanceTimeline = [
-  { time: '08:15', event: 'Auto-check completed for 42 devices', level: 'Info' },
-  { time: '09:40', event: 'Critical alert raised for Switch Rack 2', level: 'Critical' },
-  { time: '10:05', event: 'Battery replacement ticket assigned', level: 'Action' },
-  { time: '11:30', event: 'Maintenance window approved by ops lead', level: 'Info' },
-];
+const initialMaintenanceTimeline = [];
 
 async function getErrorMessage(response, fallback) {
   try {

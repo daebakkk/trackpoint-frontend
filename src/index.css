@@ -16,6 +16,19 @@
   --dash-rose: #f43f5e;
 }
 
+:root[data-theme="dark"] {
+  --primary-color: #0f172a;
+  --secondary-color: #94a3b8;
+  --highlights-color: #38bdf8;
+  --bg-color: #0b1220;
+  --dash-bg-deep: #0b1220;
+  --dash-surface: #111827;
+  --dash-stroke: #1f2a44;
+  --dash-text-main: #e2e8f0;
+  --dash-text-muted: #94a3b8;
+  --dash-cyan: #38bdf8;
+}
+
 body {
   margin: 0;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
@@ -1518,6 +1531,16 @@ body {
   font-family: 'Manrope', 'Segoe UI', sans-serif;
 }
 
+.entryForm select option,
+.assOfficeSelect option,
+.asnRangeSelect option,
+.rptRangeSelect option,
+.setField select option,
+.mntOpsRangeSelect option {
+  background: #0b1220;
+  color: #e2e8f0;
+}
+
 .assClickableRow {
   cursor: pointer;
 }
@@ -1557,6 +1580,12 @@ body {
   margin: 0 0 0.45rem;
   color: var(--highlights-color);
   font-size: 0.9rem;
+}
+
+.assetDetailActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 .assetDetailRow {

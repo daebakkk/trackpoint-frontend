@@ -13,7 +13,7 @@ export default function Settings() {
     maintenanceAlerts: true,
     assignmentUpdates: true,
     weeklySummary: false,
-    reportRange: '',
+    darkMode: false,
     currentPassword: '',
     password: '',
     confirmPassword: '',
@@ -22,7 +22,6 @@ export default function Settings() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState('');
-  const [officeOptions, setOfficeOptions] = useState([]);
 
   useEffect(() => {
     async function loadSettings() {
@@ -30,13 +29,8 @@ export default function Settings() {
       setSaveError('');
       try {
         const token = localStorage.getItem('access_token');
-        const [settingsResponse, staffResponse] = await Promise.all([
+        const [settingsResponse] = await Promise.all([
           fetch(`${API_BASE_URL}/api/settings/me/`, {
-            headers: {
-              Authorization: token ? `Bearer ${token}` : '',
-            },
-          }),
-          fetch(`${API_BASE_URL}/api/staff/`, {
             headers: {
               Authorization: token ? `Bearer ${token}` : '',
             },
@@ -53,8 +47,11 @@ export default function Settings() {
           maintenanceAlerts: data.maintenance_alerts ?? true,
           assignmentUpdates: data.assignment_updates ?? true,
           weeklySummary: data.weekly_summary ?? false,
-          reportRange: data.report_range || '',
+          darkMode: data.dark_mode ?? true,
         }));
+        const themeValue = data.dark_mode ? 'dark' : 'light';
+        document.documentElement.dataset.theme = themeValue;
+        localStorage.setItem('theme', themeValue);
       } catch (error) {
         setSaveError(error.message || 'Unable to load settings.');
       } finally {
@@ -99,11 +96,16 @@ export default function Settings() {
         maintenanceAlerts: data.maintenance_alerts ?? prev.maintenanceAlerts,
         assignmentUpdates: data.assignment_updates ?? prev.assignmentUpdates,
         weeklySummary: data.weekly_summary ?? prev.weeklySummary,
-        reportRange: data.report_range || prev.reportRange,
+        darkMode: data.dark_mode ?? prev.darkMode,
         currentPassword: '',
         password: '',
         confirmPassword: '',
       }));
+      if (typeof data.dark_mode === 'boolean') {
+        const themeValue = data.dark_mode ? 'dark' : 'light';
+        document.documentElement.dataset.theme = themeValue;
+        localStorage.setItem('theme', themeValue);
+      }
       setSaveSuccess(successMessage);
     } catch (error) {
       setSaveError(error.message || 'Unable to save settings.');
@@ -125,17 +127,9 @@ export default function Settings() {
         maintenance_alerts: form.maintenanceAlerts,
         assignment_updates: form.assignmentUpdates,
         weekly_summary: form.weeklySummary,
+        dark_mode: form.darkMode,
       },
-      'Notifications updated.',
-    );
-  }
-
-  function handleDefaultsSave() {
-    handleSave(
-      {
-        report_range: form.reportRange,
-      },
-      'Defaults saved.',
+      'Preferences updated.',
     );
   }
 
@@ -296,29 +290,25 @@ export default function Settings() {
                   />
                 </div>
                 <button type="button" className="pageActionBtn" onClick={handleNotificationsSave} disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Save Notifications'}
+                  {isSaving ? 'Saving...' : 'Save Preferences'}
                 </button>
                 </article>
 
                 <article className="setCard">
-                  <h3>Defaults</h3>
-                  <div className="setField">
-                    <label>Report range</label>
-                    <select
-                      name="reportRange"
-                    value={form.reportRange}
-                    onChange={handleChange}
-                    disabled={isLoading}
-                  >
-                    <option>This Week</option>
-                    <option>This Month</option>
-                    <option>Last 3 Months</option>
-                    <option>Last 6 Months</option>
-                  </select>
-                </div>
-                <button type="button" className="pageActionBtn" onClick={handleDefaultsSave} disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Save Defaults'}
-                </button>
+                  <h3>Theme</h3>
+                  <div className="setToggle">
+                    <div>
+                      <p>Dark mode</p>
+                      <span>Toggle the application theme</span>
+                    </div>
+                    <input
+                      type="checkbox"
+                      name="darkMode"
+                      checked={form.darkMode}
+                      onChange={handleChange}
+                      disabled={isLoading}
+                    />
+                  </div>
                 </article>
               </div>
             </section>
