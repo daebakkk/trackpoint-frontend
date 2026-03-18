@@ -67,7 +67,7 @@ export default function Profile() {
           <div className="appPageLeftRail">
             <section className="appPageLeftIntro">
               <h1>Profile</h1>
-              <p>Your account details and defaults.</p>
+              <p>Your account details and workspace identity.</p>
             </section>
             <PageSidebar context="Settings" />
           </div>
@@ -115,19 +115,6 @@ export default function Profile() {
                   <strong>{profile.email || 'Not set'}</strong>
                 </div>
               </article>
-
-              <article className="profileCard">
-                <h3>Defaults</h3>
-                <div className="profileRow">
-                  <span>Default office</span>
-                  <strong>{profile.defaultOffice}</strong>
-                </div>
-                <div className="profileRow">
-                  <span>Report range</span>
-                  <strong>{profile.reportRange}</strong>
-                </div>
-              </article>
-
             </section>
 
             {isLoading && <p className="setMessage">Loading profile...</p>}

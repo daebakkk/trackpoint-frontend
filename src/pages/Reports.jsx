@@ -261,20 +261,6 @@ export default function Reports() {
                     Consolidated health metrics, maintenance outcomes, and assignment readiness across the asset fleet.
                   </p>
                 </div>
-                <div className="rptMetaStack">
-                  <div>
-                    <span>Department</span>
-                    <strong>{departmentLabel}</strong>
-                  </div>
-                  <div>
-                    <span>Prepared By</span>
-                    <strong>{ownerLabel}</strong>
-                  </div>
-                  <div>
-                    <span>Report Window</span>
-                    <strong>{range}</strong>
-                  </div>
-                </div>
               </div>
 
               <div className="rptSummaryGrid">

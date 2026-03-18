@@ -9,6 +9,8 @@
   --text-muted: #475569;
   --profile-card-bg: #ffffff;
   --profile-row-bg: rgba(15, 23, 42, 0.04);
+  --settings-card-bg: #ffffff;
+  --settings-card-border: rgba(15, 23, 42, 0.08);
   --dash-bg-deep: #0b1624;
   --dash-surface: #102033;
   --dash-stroke: #1f3956;
@@ -29,12 +31,25 @@
   --text-muted: #94a3b8;
   --profile-card-bg: #0f172a;
   --profile-row-bg: rgba(2, 6, 23, 0.35);
+  --settings-card-bg: #0f172a;
+  --settings-card-border: rgba(191, 219, 254, 0.2);
   --dash-bg-deep: #0b1220;
   --dash-surface: #111827;
   --dash-stroke: #1f2a44;
   --dash-text-main: #e2e8f0;
   --dash-text-muted: #94a3b8;
   --dash-cyan: #1d4ed8;
+}
+
+:root[data-theme="dark"] .setField input,
+:root[data-theme="dark"] .setField select {
+  background: rgba(15, 23, 42, 0.65);
+  color: #e2e8f0;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+:root[data-theme="dark"] .setToggle {
+  background: rgba(2, 6, 23, 0.35);
 }
 
 body {
@@ -746,10 +761,10 @@ body {
 }
 
 .setCard {
-  background: var(--primary-color);
+  background: var(--settings-card-bg);
   border-radius: 0.85rem;
   padding: 1rem;
-  border: 1px solid rgba(191, 219, 254, 0.2);
+  border: 1px solid var(--settings-card-border);
   box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
   display: grid;
   gap: 0.75rem;
@@ -773,15 +788,15 @@ body {
 }
 
 .setField label {
-  color: #cbd5e1;
+  color: var(--text-muted);
   font-size: 0.78rem;
 }
 
 .setField input,
 .setField select {
   border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.07);
-  color: #ffffff;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-color);
   border-radius: 0.5rem;
   padding: 0.56rem 0.65rem;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
@@ -792,20 +807,20 @@ body {
   justify-content: space-between;
   gap: 0.6rem;
   align-items: center;
-  border: 1px solid rgba(191, 219, 254, 0.18);
+  border: 1px solid var(--settings-card-border);
   border-radius: 0.6rem;
   padding: 0.55rem 0.6rem;
-  background: rgba(2, 6, 23, 0.18);
+  background: rgba(15, 23, 42, 0.04);
 }
 
 .setToggle p {
   margin: 0;
-  color: #e2e8f0;
+  color: var(--text-color);
   font-size: 0.85rem;
 }
 
 .setToggle span {
-  color: #94a3b8;
+  color: var(--text-muted);
   font-size: 0.75rem;
 }
 
@@ -901,7 +916,7 @@ body {
 }
 
 .profileCard {
-  background: var(--profile-card-bg);
+  background: var(--primary-color);
   border-radius: 0.85rem;
   padding: 1rem;
   border: 1px solid rgba(191, 219, 254, 0.2);
@@ -912,7 +927,7 @@ body {
 
 .profileCard h3 {
   margin: 0;
-  color: var(--text-color);
+  color: #ffffff;
   font-size: 0.95rem;
 }
 
@@ -922,13 +937,13 @@ body {
   gap: 0.6rem;
   padding: 0.4rem 0.5rem;
   border-radius: 0.5rem;
-  background: var(--profile-row-bg);
-  color: var(--text-color);
+  background: rgba(2, 6, 23, 0.18);
+  color: #e2e8f0;
   font-size: 0.82rem;
 }
 
 .profileRow span {
-  color: var(--text-muted);
+  color: #94a3b8;
 }
 
 .profileHint {
