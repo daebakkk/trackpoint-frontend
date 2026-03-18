@@ -53,6 +53,7 @@ function buildLinePoints(series) {
 }
 
 export default function Dashboard() {
+  const [firstName, setFirstName] = useState('');
   const [assets, setAssets] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -103,6 +104,25 @@ export default function Dashboard() {
     }
 
     loadDashboardData();
+  }, []);
+
+  useEffect(() => {
+    async function loadUser() {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/auth/me/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        setFirstName((data.first_name || '').trim());
+      } catch {
+        // ignore user fetch errors
+      }
+    }
+
+    loadUser();
   }, []);
 
   const utilization = useMemo(() => {
@@ -208,6 +228,10 @@ export default function Dashboard() {
             <PageSidebar context="Dashboard" />
           </div>
           <div className="appPageMain">
+            <section className="dashGreeting">
+              <h2>{`Hi, ${firstName || 'there'}`}</h2>
+              <p>Here is your latest operational snapshot.</p>
+            </section>
             <section className="dashKpiGrid">
               {kpis.map((card) => (
                 <article key={card.label} className="dashKpiCard">

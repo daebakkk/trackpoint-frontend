@@ -465,6 +465,23 @@ body {
   margin-bottom: 1.25rem;
 }
 
+.dashGreeting {
+  margin-bottom: 1rem;
+}
+
+.dashGreeting h2 {
+  margin: 0 0 0.2rem;
+  color: var(--dash-text-main);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.dashGreeting p {
+  margin: 0;
+  color: var(--dash-text-muted);
+  font-size: 0.86rem;
+}
+
 .dashEyebrow {
   margin: 0;
   font-size: 0.8rem;
@@ -681,6 +698,31 @@ body {
   gap: 0.85rem;
 }
 
+.setSection {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.1rem;
+}
+
+.setSectionHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.setSectionHead h2 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.05rem;
+}
+
+.setSectionHead p {
+  margin: 0.2rem 0 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
 .setCard {
   background: var(--primary-color);
   border-radius: 0.85rem;
@@ -695,6 +737,12 @@ body {
   margin: 0;
   color: #ffffff;
   font-size: 1rem;
+}
+
+.setCard h3 {
+  margin: 0;
+  color: #ffffff;
+  font-size: 0.98rem;
 }
 
 .setField {
@@ -755,6 +803,16 @@ body {
 
 .setMessageSuccess {
   color: #bbf7d0;
+}
+
+.setProfileLine {
+  margin: 0.3rem 0;
+  color: #cbd5e1;
+  font-size: 0.84rem;
+}
+
+.setProfileLine strong {
+  color: #e2e8f0;
 }
 .suCard {
   background-color: var(--primary-color);
@@ -2714,16 +2772,13 @@ body {
 .mntOpsDueTag {
   display: inline-block;
   margin-top: 0.4rem;
+  margin-bottom: 0.45rem;
   padding: 0.18rem 0.5rem;
   border-radius: 999px;
   font-size: 0.7rem;
   font-weight: 700;
 }
 
-.mntOpsDueTag + .mntOpsCompleteBtn,
-.mntOpsCompleteBtn + .mntOpsDueTag {
-  margin-top: 0.6rem;
-}
 
 .mntOpsDueToday {
   color: #fecaca;

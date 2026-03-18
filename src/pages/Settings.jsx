@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import PageSidebar from '../components/PageSidebar';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 export default function Settings() {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     displayName: '',
     email: '',
@@ -160,14 +162,24 @@ export default function Settings() {
           <div className="appPageLeftRail">
             <section className="appPageLeftIntro">
               <h1>Settings</h1>
-              <p>Manage your workspace preferences and defaults.</p>
+              <p>Manage account details, preferences, and security.</p>
             </section>
             <PageSidebar context="Settings" />
           </div>
           <div className="appPageMain">
-            <section className="setGrid">
-              <article className="setCard">
-                <h2>Profile</h2>
+            <section className="setSection">
+              <div className="setSectionHead">
+                <div>
+                  <h2>Account Details</h2>
+                  <p>Update your name, email, and password.</p>
+                </div>
+                <button type="button" className="pageActionBtn" onClick={() => navigate('/profile')}>
+                  View Profile
+                </button>
+              </div>
+              <div className="setGrid">
+                <article className="setCard">
+                  <h3>Profile</h3>
                 <div className="setField">
                   <label>Display name</label>
                   <input
@@ -191,10 +203,49 @@ export default function Settings() {
                 <button type="button" className="pageActionBtn" onClick={handleProfileSave} disabled={isSaving}>
                   {isSaving ? 'Saving...' : 'Update Profile'}
                 </button>
-              </article>
+                </article>
 
-              <article className="setCard">
-                <h2>Notifications</h2>
+                <article className="setCard">
+                  <h3>Security</h3>
+                  <div className="setField">
+                    <label>Change password</label>
+                    <input
+                      type="password"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      placeholder="New password"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="setField">
+                    <label>Confirm password</label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="Confirm password"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <button type="button" className="pageActionBtn" onClick={handlePasswordSave} disabled={isSaving}>
+                    {isSaving ? 'Saving...' : 'Update Password'}
+                  </button>
+                </article>
+              </div>
+            </section>
+
+            <section className="setSection">
+              <div className="setSectionHead">
+                <div>
+                  <h2>Preferences</h2>
+                  <p>Notification preferences and default views.</p>
+                </div>
+              </div>
+              <div className="setGrid">
+                <article className="setCard">
+                  <h3>Notifications</h3>
                 <div className="setToggle">
                   <div>
                     <p>Maintenance alerts</p>
@@ -237,10 +288,10 @@ export default function Settings() {
                 <button type="button" className="pageActionBtn" onClick={handleNotificationsSave} disabled={isSaving}>
                   {isSaving ? 'Saving...' : 'Save Notifications'}
                 </button>
-              </article>
+                </article>
 
-              <article className="setCard">
-                <h2>Defaults</h2>
+                <article className="setCard">
+                  <h3>Defaults</h3>
                 <div className="setField">
                   <label>Default office</label>
                   <select
@@ -272,36 +323,8 @@ export default function Settings() {
                 <button type="button" className="pageActionBtn" onClick={handleDefaultsSave} disabled={isSaving}>
                   {isSaving ? 'Saving...' : 'Save Defaults'}
                 </button>
-              </article>
-
-              <article className="setCard">
-                <h2>Security</h2>
-                <div className="setField">
-                  <label>Change password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                    placeholder="New password"
-                    disabled={isLoading}
-                  />
-                </div>
-                <div className="setField">
-                  <label>Confirm password</label>
-                  <input
-                    type="password"
-                    name="confirmPassword"
-                    value={form.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="Confirm password"
-                    disabled={isLoading}
-                  />
-                </div>
-                <button type="button" className="pageActionBtn" onClick={handlePasswordSave} disabled={isSaving}>
-                  {isSaving ? 'Saving...' : 'Update Password'}
-                </button>
-              </article>
+                </article>
+              </div>
             </section>
             {saveError && <p className="setMessage setMessageError">{saveError}</p>}
             {saveSuccess && <p className="setMessage setMessageSuccess">{saveSuccess}</p>}
