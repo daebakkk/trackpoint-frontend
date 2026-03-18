@@ -9,8 +9,6 @@
   --text-muted: #475569;
   --profile-card-bg: #ffffff;
   --profile-row-bg: rgba(15, 23, 42, 0.04);
-  --settings-card-bg: #ffffff;
-  --settings-card-border: rgba(15, 23, 42, 0.08);
   --dash-bg-deep: #0b1624;
   --dash-surface: #102033;
   --dash-stroke: #1f3956;
@@ -31,8 +29,6 @@
   --text-muted: #94a3b8;
   --profile-card-bg: #0f172a;
   --profile-row-bg: rgba(2, 6, 23, 0.35);
-  --settings-card-bg: #0f172a;
-  --settings-card-border: rgba(191, 219, 254, 0.2);
   --dash-bg-deep: #0b1220;
   --dash-surface: #111827;
   --dash-stroke: #1f2a44;
@@ -41,16 +37,6 @@
   --dash-cyan: #1d4ed8;
 }
 
-:root[data-theme="dark"] .setField input,
-:root[data-theme="dark"] .setField select {
-  background: rgba(15, 23, 42, 0.65);
-  color: #e2e8f0;
-  border-color: rgba(148, 163, 184, 0.35);
-}
-
-:root[data-theme="dark"] .setToggle {
-  background: rgba(2, 6, 23, 0.35);
-}
 
 body {
   margin: 0;
@@ -761,10 +747,10 @@ body {
 }
 
 .setCard {
-  background: var(--settings-card-bg);
+  background: var(--primary-color);
   border-radius: 0.85rem;
   padding: 1rem;
-  border: 1px solid var(--settings-card-border);
+  border: 1px solid rgba(191, 219, 254, 0.2);
   box-shadow: 0 10px 24px rgba(2, 6, 23, 0.22);
   display: grid;
   gap: 0.75rem;
@@ -788,15 +774,15 @@ body {
 }
 
 .setField label {
-  color: var(--text-muted);
+  color: #cbd5e1;
   font-size: 0.78rem;
 }
 
 .setField input,
 .setField select {
   border: 1px solid rgba(255, 255, 255, 0.25);
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
   border-radius: 0.5rem;
   padding: 0.56rem 0.65rem;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
@@ -807,20 +793,20 @@ body {
   justify-content: space-between;
   gap: 0.6rem;
   align-items: center;
-  border: 1px solid var(--settings-card-border);
+  border: 1px solid rgba(191, 219, 254, 0.18);
   border-radius: 0.6rem;
   padding: 0.55rem 0.6rem;
-  background: rgba(15, 23, 42, 0.04);
+  background: rgba(2, 6, 23, 0.18);
 }
 
 .setToggle p {
   margin: 0;
-  color: var(--text-color);
+  color: #e2e8f0;
   font-size: 0.85rem;
 }
 
 .setToggle span {
-  color: var(--text-muted);
+  color: #94a3b8;
   font-size: 0.75rem;
 }
 
