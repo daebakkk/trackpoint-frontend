@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import PageSidebar from '../components/PageSidebar';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8000';
 
 export default function Profile() {
+  const navigate = useNavigate();
   const [profile, setProfile] = useState({
     username: '',
     email: '',
@@ -37,8 +39,8 @@ export default function Profile() {
         const meData = await meResponse.json();
         const settingsData = settingsResponse.ok ? await settingsResponse.json() : {};
         setProfile({
-          username: meData.username || '',
-          email: meData.email || settingsData.email || '',
+          username: settingsData.username || meData.username || '',
+          email: settingsData.email || meData.email || '',
           firstName: meData.first_name || '',
           lastName: meData.last_name || '',
           displayName: settingsData.display_name || `${meData.first_name || ''} ${meData.last_name || ''}`.trim() || meData.username || meData.email || '',
@@ -82,6 +84,19 @@ export default function Profile() {
                   <span>{profile.email || 'Email pending'}</span>
                 </div>
               </div>
+              <div className="profileHeroActions">
+                <button
+                  type="button"
+                  className="pageActionBtn"
+                  onClick={() => {
+                    localStorage.removeItem('access_token');
+                    localStorage.removeItem('refresh_token');
+                    navigate('/?login=1');
+                  }}
+                >
+                  Log Out
+                </button>
+              </div>
             </section>
 
             <section className="profileGrid">
@@ -113,18 +128,6 @@ export default function Profile() {
                 </div>
               </article>
 
-              <article className="profileCard">
-                <h3>Quick Links</h3>
-                <p className="profileHint">Jump back into your workspace.</p>
-                <div className="profileLinks">
-                  <button type="button" className="pageActionBtn" onClick={() => window.location.assign('/dashboard')}>
-                    Dashboard
-                  </button>
-                  <button type="button" className="pageActionBtn" onClick={() => window.location.assign('/settings')}>
-                    Settings
-                  </button>
-                </div>
-              </article>
             </section>
 
             {isLoading && <p className="setMessage">Loading profile...</p>}

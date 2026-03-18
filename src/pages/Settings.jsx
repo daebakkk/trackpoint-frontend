@@ -51,9 +51,6 @@ export default function Settings() {
           weeklySummary: data.weekly_summary ?? false,
           darkMode: data.dark_mode ?? false,
         }));
-        const themeValue = data.dark_mode ? 'dark' : 'light';
-        document.documentElement.dataset.theme = themeValue;
-        localStorage.setItem('theme', themeValue);
       } catch (error) {
         setSaveError(error.message || 'Unable to load settings.');
       } finally {
@@ -72,11 +69,6 @@ export default function Settings() {
     }));
   }
 
-  useEffect(() => {
-    const themeValue = form.darkMode ? 'dark' : 'light';
-    document.documentElement.dataset.theme = themeValue;
-    localStorage.setItem('theme', themeValue);
-  }, [form.darkMode]);
 
   async function handleSave(payload, successMessage) {
     setIsSaving(true);
