@@ -24,7 +24,11 @@ function RequireAuth({ children }) {
 function App() {
   useEffect(() => {
     const storedTheme = localStorage.getItem('theme');
-    document.documentElement.dataset.theme = storedTheme || 'light';
+    const themeValue = storedTheme || 'dark';
+    document.documentElement.dataset.theme = themeValue;
+    if (!storedTheme) {
+      localStorage.setItem('theme', themeValue);
+    }
   }, []);
   return (
   <>

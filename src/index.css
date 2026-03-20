@@ -74,6 +74,7 @@ body {
   gap: 2rem;
   position: relative;
   overflow: hidden;
+  animation: landingReveal 0.9s ease both;
 }
 
 .landingBackdrop {
@@ -152,6 +153,7 @@ body {
   border-radius: 50%;
   border: 1px solid rgba(148, 163, 184, 0.3);
   box-shadow: inset 0 0 40px rgba(59, 130, 246, 0.2);
+  animation: landingFloat 6s ease-in-out infinite;
 }
 
 .landingDeviceStack {
@@ -298,6 +300,7 @@ body {
   padding: 1.1rem;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.18);
   backdrop-filter: blur(10px);
+  animation: landingReveal 0.9s ease both;
 }
 
 .landingCardAccent {
@@ -375,6 +378,7 @@ body {
   border-radius: 14px;
   background: rgba(15, 23, 42, 0.7);
   padding: 0.95rem;
+  animation: landingReveal 0.9s ease both;
 }
 
 .landingWorkflowCard strong {
@@ -408,6 +412,7 @@ body {
   background: linear-gradient(135deg, #0f172a, #1e1b4b);
   padding: 1.2rem;
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.22);
+  animation: landingReveal 0.9s ease both;
 }
 
 .landingOpsEyebrow {
@@ -477,6 +482,7 @@ body {
   border-radius: 14px;
   background: rgba(15, 23, 42, 0.7);
   padding: 0.95rem;
+  animation: landingReveal 0.9s ease both;
 }
 
 .landingFaqCard h3 {
@@ -502,6 +508,65 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 0.8rem;
+  animation: landingReveal 0.9s ease both;
+}
+
+.landingFeatureCard:nth-child(2),
+.landingWorkflowCard:nth-child(2),
+.landingFaqCard:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.landingFeatureCard:nth-child(3),
+.landingWorkflowCard:nth-child(3),
+.landingFaqCard:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.landingOpsPanel {
+  animation-delay: 0.15s;
+}
+
+.landingOpsStats {
+  animation-delay: 0.25s;
+}
+
+.landingBottomCta {
+  animation-delay: 0.3s;
+}
+
+@keyframes landingReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landingFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landingHero,
+  .landingFeatureCard,
+  .landingWorkflowCard,
+  .landingOpsPanel,
+  .landingOpsStats,
+  .landingFaqCard,
+  .landingBottomCta,
+  .landingHeroRing {
+    animation: none;
+  }
 }
 
 .landingBottomCta p {
