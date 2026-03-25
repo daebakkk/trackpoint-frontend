@@ -24,6 +24,13 @@
   justify-content: space-between;
 }
 
+.navActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+}
+
 .navBrand {
   font-size: 1.24rem;
   font-weight: 800;
@@ -42,6 +49,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  position: relative;
 }
 
 .navIconBtn:hover {
@@ -52,6 +60,115 @@
 .navIcon {
   width: 18px;
   height: 18px;
+}
+
+.navNotifDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(31, 41, 55, 1);
+}
+
+.navNotifPanel {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  width: min(360px, 90vw);
+  background: var(--primary-color);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+  padding: 0.85rem;
+  z-index: 20;
+}
+
+.navNotifHead {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 0.65rem;
+}
+
+.navNotifHead h4 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.navNotifHead p {
+  margin: 0.1rem 0 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.navNotifHead button {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  padding: 0.35rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  cursor: pointer;
+}
+
+.navNotifHead button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.navNotifList {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.navNotifItem {
+  text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  color: #e2e8f0;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+
+.navNotifItem strong {
+  display: block;
+  font-size: 0.85rem;
+  color: #f8fafc;
+}
+
+.navNotifItem p {
+  margin: 0.2rem 0 0;
+  font-size: 0.78rem;
+  color: rgba(226, 232, 240, 0.75);
+}
+
+.navNotifItem span {
+  font-size: 0.7rem;
+  color: rgba(226, 232, 240, 0.6);
+  white-space: nowrap;
+}
+
+.navNotifUnread {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.navNotifEmpty {
+  margin: 0;
+  font-size: 0.8rem;
+  color: rgba(226, 232, 240, 0.7);
+  text-align: center;
+  padding: 0.8rem 0;
 }
 
 .navLinks {
