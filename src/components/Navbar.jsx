@@ -60,10 +60,17 @@ export default function Navbar() {
         return () => document.removeEventListener('mousedown', handleOutsideClick);
     }, [notifOpen]);
 
+
     const unreadCount = useMemo(
         () => notifications.filter((item) => !item.is_read).length,
         [notifications],
     );
+
+    useEffect(() => {
+        if (notifOpen && unreadCount > 0) {
+            markAllRead();
+        }
+    }, [notifOpen, unreadCount]);
 
     async function markNotificationRead(notificationId) {
         const token = localStorage.getItem('access_token');

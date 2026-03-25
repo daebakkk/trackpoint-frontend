@@ -52,6 +52,16 @@ function buildLinePoints(series) {
   });
 }
 
+function parseEtaDate(value) {
+  if (!value) return null;
+  if (/^\d{4}-\d{2}-\d{2}T/.test(value)) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
 export default function Dashboard() {
   const [firstName, setFirstName] = useState('');
   const [assets, setAssets] = useState([]);
@@ -203,9 +213,15 @@ export default function Dashboard() {
 
   const kpis = useMemo(() => {
     const openTickets = tickets.filter((ticket) => ticket.status !== 'Completed');
-    const inRepairTickets = tickets.filter((ticket) => {
-      const status = (ticket.status || '').toLowerCase();
-      return status.includes('repair') || status.includes('in progress') || status.includes('in-progress');
+    const dueSoonTickets = tickets.filter((ticket) => {
+      if (ticket.status === 'Completed') return false;
+      const etaDate = parseEtaDate(ticket.eta);
+      if (!etaDate) return false;
+      const today = new Date();
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const startOfTomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+      const startOfDayAfter = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 2);
+      return etaDate >= startOfToday && etaDate < startOfDayAfter;
     });
     const totalAssets = assets.length;
     const healthyAssets = assets.filter((asset) => {
@@ -218,7 +234,7 @@ export default function Dashboard() {
     return [
       { label: 'Asset Uptime', value: uptime, trend: 'Live from asset status' },
       { label: 'Open Tickets', value: `${openTickets.length}`, trend: 'Active maintenance tickets' },
-      { label: 'In Repair', value: `${inRepairTickets.length}`, trend: 'In-progress tickets' },
+      { label: 'Maintenance Due Soon', value: `${dueSoonTickets.length}`, trend: 'Due today or tomorrow' },
       { label: 'Unassigned Assets', value: `${unassignedAssets}`, trend: 'Awaiting assignment' },
     ];
   }, [assets, tickets]);
