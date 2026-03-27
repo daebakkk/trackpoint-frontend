@@ -10,12 +10,6 @@ const initialMaintenanceLanes = {
   Preventive: [],
 };
 
-const machineHealth = [
-  { system: 'Endpoint Fleet', uptime: '99.2%', trend: '+0.4%' },
-  { system: 'Network Core', uptime: '98.6%', trend: '-0.2%' },
-  { system: 'Print Services', uptime: '97.9%', trend: '+0.1%' },
-];
-
 const initialMaintenanceTimeline = [];
 
 async function getErrorMessage(response, fallback) {
@@ -80,6 +74,26 @@ export default function Maintenance() {
     owner: '',
     eta: '',
   });
+
+  const healthCards = (() => {
+    const openTickets = tickets.filter((ticket) => ticket.status !== 'Completed').length;
+    const completedTickets = tickets.filter((ticket) => ticket.status === 'Completed').length;
+    const dueSoon = tickets.filter((ticket) => {
+      if (ticket.status === 'Completed') return false;
+      const etaDate = parseEtaDate(ticket.eta);
+      if (!etaDate) return false;
+      const today = new Date();
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const startOfWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 7);
+      return etaDate >= startOfToday && etaDate < startOfWeek;
+    }).length;
+
+    return [
+      { label: 'Open Tickets', value: `${openTickets}`, meta: 'Active maintenance items' },
+      { label: 'Due This Week', value: `${dueSoon}`, meta: 'Upcoming deadlines' },
+      { label: 'Completed Repairs', value: `${completedTickets}`, meta: 'Resolved tickets' },
+    ];
+  })();
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -356,11 +370,11 @@ export default function Maintenance() {
             )}
 
             <section className="mntOpsHealthGrid">
-              {machineHealth.map((item) => (
-                <article className="mntOpsHealthCard" key={item.system}>
-                  <p>{item.system}</p>
-                  <h3>{item.uptime}</h3>
-                  <span>{item.trend} this week</span>
+              {healthCards.map((item) => (
+                <article className="mntOpsHealthCard" key={item.label}>
+                  <p>{item.label}</p>
+                  <h3>{item.value}</h3>
+                  <span>{item.meta}</span>
                 </article>
               ))}
             </section>
