@@ -91,6 +91,7 @@ function formatDelta(current, previous) {
 
 export default function Reports() {
   const [range, setRange] = useState('This Month');
+  const [location, setLocation] = useState('All Locations');
   const [assets, setAssets] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -125,47 +126,63 @@ export default function Reports() {
     loadReportData();
   }, []);
 
+  const locationOptions = useMemo(
+    () => ['All Locations', ...new Set(assets.map((asset) => asset.location).filter(Boolean))],
+    [assets],
+  );
+
   const reportRows = useMemo(() => {
     const { start, end } = getRangeWindow(range);
     const previousWindow = getPreviousWindow(start, end);
+    const selectedAssets = location === 'All Locations'
+      ? assets
+      : assets.filter((asset) => asset.location === location);
+    const assetLocationMap = selectedAssets.reduce((acc, asset) => {
+      acc[asset.id] = asset.location;
+      acc[asset.asset_id] = asset.location;
+      return acc;
+    }, {});
 
-    const workingAssets = assets.filter((asset) => {
+    const workingAssets = selectedAssets.filter((asset) => {
       const status = (asset.status || '').toLowerCase();
       return status.includes('good') || status.includes('working');
     }).length;
-    const inRepairAssets = assets.filter((asset) => {
+    const inRepairAssets = selectedAssets.filter((asset) => {
       const status = (asset.status || '').toLowerCase();
       return status.includes('repair') || status.includes('critical');
     }).length;
-    const lostAssets = assets.filter((asset) => (asset.status || '').toLowerCase().includes('lost')).length;
-    const retiredAssets = assets.filter((asset) => {
+    const lostAssets = selectedAssets.filter((asset) => (asset.status || '').toLowerCase().includes('lost')).length;
+    const retiredAssets = selectedAssets.filter((asset) => {
       const status = (asset.status || '').toLowerCase();
       return status.includes('retired') || status.includes('decommission');
     }).length;
-    const unassignedAssets = assets.filter((asset) => !asset.assigned_to).length;
+    const unassignedAssets = selectedAssets.filter((asset) => !asset.assigned_to).length;
 
-    const ticketsInRange = tickets.filter((ticket) => {
+    const ticketsForLocation = location === 'All Locations'
+      ? tickets
+      : tickets.filter((ticket) => {
+        const assetKey = ticket.asset_ref || ticket.asset_id || ticket.asset_code;
+        return assetLocationMap[assetKey] === location;
+      });
+
+    const ticketsInRange = ticketsForLocation.filter((ticket) => {
       const createdAt = parseDate(ticket.created_at);
       return createdAt && createdAt >= start && createdAt <= end;
     }).length;
-    const ticketsPrevious = tickets.filter((ticket) => {
+    const ticketsPrevious = ticketsForLocation.filter((ticket) => {
       const createdAt = parseDate(ticket.created_at);
       return createdAt && createdAt >= previousWindow.start && createdAt <= previousWindow.end;
     }).length;
 
-    const preventiveOverdue = tickets.filter((ticket) => {
-      if (ticket.lane !== 'Preventive') return false;
-      const etaDate = parseDate(ticket.eta);
-      if (!etaDate) return false;
-      const createdAt = parseDate(ticket.created_at);
-      return etaDate <= end && (!createdAt || createdAt <= end);
+    const resolvedTickets = ticketsForLocation.filter((ticket) => {
+      if (ticket.status !== 'Completed') return false;
+      const completedAt = parseDate(ticket.completed_at);
+      return completedAt && completedAt >= start && completedAt <= end;
     }).length;
-    const preventiveOverduePrevious = tickets.filter((ticket) => {
-      if (ticket.lane !== 'Preventive') return false;
-      const etaDate = parseDate(ticket.eta);
-      if (!etaDate) return false;
-      const createdAt = parseDate(ticket.created_at);
-      return etaDate <= previousWindow.end && (!createdAt || createdAt <= previousWindow.end);
+    const resolvedTicketsPrevious = ticketsForLocation.filter((ticket) => {
+      if (ticket.status !== 'Completed') return false;
+      const completedAt = parseDate(ticket.completed_at);
+      return completedAt && completedAt >= previousWindow.start && completedAt <= previousWindow.end;
     }).length;
 
     return [
@@ -206,13 +223,13 @@ export default function Reports() {
         trend: 'Live snapshot',
       },
       {
-        metric: 'Preventive Tickets Overdue',
-        count: preventiveOverdue,
-        note: `Preventive tickets due by ${end.toLocaleDateString()}`,
-        trend: formatDelta(preventiveOverdue, preventiveOverduePrevious),
+        metric: 'Tickets Resolved',
+        count: resolvedTickets,
+        note: `Tickets completed between ${start.toLocaleDateString()} and ${end.toLocaleDateString()}`,
+        trend: formatDelta(resolvedTickets, resolvedTicketsPrevious),
       },
     ];
-  }, [assets, tickets, range]);
+  }, [assets, tickets, range, location]);
 
   const summaryCards = useMemo(() => reportRows.slice(0, 4), [reportRows]);
 
@@ -237,6 +254,18 @@ export default function Reports() {
                 <button type="button" className="pageActionBtn">Create Report</button>
               </div>
               <div className="rptRangeBar">
+                <select
+                  id="report-location"
+                  className="assOfficeSelect rptRangeSelect"
+                  value={location}
+                  onChange={(event) => setLocation(event.target.value)}
+                >
+                  {locationOptions.map((item) => (
+                    <option key={item} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
                 <select
                   id="report-range"
                   className="assOfficeSelect rptRangeSelect"
