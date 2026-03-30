@@ -183,7 +183,7 @@ export default function Location() {
             <section className="locTop">
               <div className="assTopRow">
                 <button type="button" className="pageActionBtn" onClick={() => setShowForm(true)}>
-                  Check In Asset
+                  Update Location
                 </button>
                 <input
                   className="pageSearchInput"
@@ -270,9 +270,9 @@ export default function Location() {
 
       {showForm && (
         <div className="entryModalBackdrop" onClick={() => setShowForm(false)}>
-          <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Check in asset" onClick={(e) => e.stopPropagation()}>
+          <div className="entryModalCard" role="dialog" aria-modal="true" aria-label="Update location" onClick={(e) => e.stopPropagation()}>
             <div className="entryModalHead">
-              <h2>Check In Asset</h2>
+              <h2>Update Location</h2>
               <button type="button" className="entryCloseBtn" onClick={() => setShowForm(false)} aria-label="Close location form">x</button>
             </div>
             <form className="entryForm" onSubmit={handleSubmit}>
@@ -314,7 +314,7 @@ export default function Location() {
                 />
               </label>
               <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save Check-in'}
+                {isSubmitting ? 'Saving...' : 'Save Update'}
               </button>
             </form>
           </div>

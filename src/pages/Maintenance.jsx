@@ -90,7 +90,7 @@ export default function Maintenance() {
 
     return [
       { label: 'Open Tickets', value: `${openTickets}`, meta: 'Active maintenance items' },
-      { label: 'Due This Week', value: `${dueSoon}`, meta: 'Upcoming deadlines' },
+      { label: 'Due This Week', value: `${dueSoon}`, meta: 'Upcoming repairs' },
       { label: 'Completed Repairs', value: `${completedTickets}`, meta: 'Resolved tickets' },
     ];
   })();
