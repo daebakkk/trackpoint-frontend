@@ -97,7 +97,13 @@ export default function Maintenance() {
 
   function handleChange(event) {
     const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm((prev) => {
+      if (name === 'assetId') {
+        const asset = assets.find((item) => String(item.asset_id || item.assetId).trim().toLowerCase() === value.trim().toLowerCase());
+        return { ...prev, [name]: value, owner: asset?.location || prev.owner };
+      }
+      return { ...prev, [name]: value };
+    });
   }
 
   function buildNextTicketId(laneValue, existingTickets) {

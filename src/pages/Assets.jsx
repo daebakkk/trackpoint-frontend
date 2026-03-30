@@ -112,7 +112,15 @@ export default function Assets() {
 
     function handleTicketChange(event) {
         const { name, value } = event.target;
-        setTicketForm((prev) => ({ ...prev, [name]: value }));
+        setTicketForm((prev) => {
+            if (name === 'assetId') {
+                const asset = assets.find(
+                    (item) => String(item.assetId).trim().toLowerCase() === value.trim().toLowerCase(),
+                );
+                return { ...prev, [name]: value, owner: asset?.location || prev.owner };
+            }
+            return { ...prev, [name]: value };
+        });
     }
 
     async function openAssetDetails(asset) {
@@ -640,14 +648,16 @@ export default function Assets() {
                                                 <button type="button" className="pageActionBtn" onClick={() => setShowTicketForm(true)}>
                                                     Create Ticket
                                                 </button>
-                                                <button
-                                                    type="button"
-                                                    className="pageActionBtn assetRetireBtn"
-                                                    onClick={handleRetireAsset}
-                                                    disabled={isRetiring}
-                                                >
-                                                    {isRetiring ? 'Retiring...' : 'Retire Asset'}
-                                                </button>
+                                                {selectedAsset.status !== 'Retired' && (
+                                                    <button
+                                                        type="button"
+                                                        className="pageActionBtn assetRetireBtn"
+                                                        onClick={handleRetireAsset}
+                                                        disabled={isRetiring}
+                                                    >
+                                                        {isRetiring ? 'Retiring...' : 'Retire Asset'}
+                                                    </button>
+                                                )}
                                             </div>
                                         </section>
                                     </div>
