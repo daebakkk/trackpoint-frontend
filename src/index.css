@@ -1969,6 +1969,17 @@ body {
   gap: 0.5rem;
 }
 
+.assetRetireBtn {
+  border-color: rgba(248, 113, 113, 0.65);
+  color: #fecaca;
+}
+
+.assetRetireBtn:hover {
+  border-color: rgba(248, 113, 113, 1);
+  color: #ffffff;
+  background: rgba(248, 113, 113, 0.18);
+}
+
 .assetDetailRow {
   display: grid;
   gap: 0.25rem;

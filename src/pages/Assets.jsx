@@ -46,6 +46,7 @@ export default function Assets() {
     const [isAssigning, setIsAssigning] = useState(false);
     const [isCreatingTicket, setIsCreatingTicket] = useState(false);
     const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+    const [isRetiring, setIsRetiring] = useState(false);
     const [form, setForm] = useState({
         assetId: '',
         name: '',
@@ -318,6 +319,29 @@ export default function Assets() {
         }
     }
 
+    async function handleRetireAsset() {
+        if (!selectedAsset) return;
+        setIsRetiring(true);
+        setFetchError('');
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/assets/${selectedAsset.id}/`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'Retired', assigned_to: null }),
+            });
+            if (!response.ok) {
+                throw new Error(await getErrorMessage(response, 'Failed to retire asset'));
+            }
+            const updated = await response.json();
+            setAssets((prev) => prev.map((item) => (item.id === updated.id ? normalizeAsset(updated) : item)));
+            setSelectedAsset(normalizeAsset(updated));
+        } catch (error) {
+            setFetchError(error.message || 'Unable to retire asset.');
+        } finally {
+            setIsRetiring(false);
+        }
+    }
+
     const officeOptions = ['All Offices', ...new Set(assets.map((asset) => asset.location))];
     const filteredAssets =
         selectedOffice === 'All Offices'
@@ -477,6 +501,7 @@ export default function Assets() {
                                                 <option>In Repair</option>
                                                 <option>Lost</option>
                                                 <option>Critical Alert</option>
+                                                <option>Retired</option>
                                             </select>
                                         </label>
                                         <button type="submit" className="entrySubmitBtn" disabled={isSubmitting}>
@@ -614,6 +639,14 @@ export default function Assets() {
                                                 </button>
                                                 <button type="button" className="pageActionBtn" onClick={() => setShowTicketForm(true)}>
                                                     Create Ticket
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="pageActionBtn assetRetireBtn"
+                                                    onClick={handleRetireAsset}
+                                                    disabled={isRetiring}
+                                                >
+                                                    {isRetiring ? 'Retiring...' : 'Retire Asset'}
                                                 </button>
                                             </div>
                                         </section>
